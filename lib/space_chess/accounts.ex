@@ -9,7 +9,9 @@ defmodule SpaceChess.Accounts do
   alias SpaceChess.Accounts.{User, UserToken, UserNotifier}
 
   ## Database getters
-
+  @doc """
+  returns all users
+  """
   def get_all_users do
     Repo.all(User)
   end
