@@ -1,5 +1,5 @@
-defmodule SpaceChess.Messages.Message do
-  alias SpaceChess.Messages.Message
+defmodule SpaceChess.UserCommunication.Message do
+  alias SpaceChess.UserCommunication.Message
   import Ecto.Query
   use Ecto.Schema
   import Ecto.Changeset
@@ -8,7 +8,7 @@ defmodule SpaceChess.Messages.Message do
     field :message, :string
     field :sender_name, :string
     field :sender_id, :integer
-    belongs_to :conversation, SpaceChess.Messages.Conversation
+    belongs_to :conversation, SpaceChess.UserCommunication.Conversation
 
     timestamps(type: :utc_datetime)
   end

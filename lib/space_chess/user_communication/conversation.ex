@@ -1,6 +1,6 @@
-defmodule SpaceChess.Messages.Conversation do
+defmodule SpaceChess.UserCommunication.Conversation do
   use Ecto.Schema
-  alias SpaceChess.Messages.Message
+  alias SpaceChess.UserCommunication.Message
 
   schema "conversations" do
     field :active, :boolean, default: true

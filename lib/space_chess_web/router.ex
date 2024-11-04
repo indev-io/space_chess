@@ -101,6 +101,6 @@ defmodule SpaceChessWeb.Router do
   scope "/", SpaceChessWeb do
     pipe_through [:browser]
 
-    live "/game", SpaceChessWeb.GameLive
+    live "/game", GameLive
   end
 end
