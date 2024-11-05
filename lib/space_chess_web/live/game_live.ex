@@ -8,6 +8,7 @@ defmodule SpaceChessWeb.GameLive do
   def render(assigns) do
     ~H"""
     <div phx-update phx-hook="ThreeHook" id="threejs-container" phx-update="ignore"></div>
+    <button>Scramble Board</button>
     """
   end
 end
