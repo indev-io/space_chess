@@ -1,9 +1,10 @@
 import * as THREE from "../../vendor/three/three.module.js"
 import { OrbitControls } from "../../vendor/three/OrbitControls.js"
-window.THREE = THREE
+// window.THREE = THREE
 
 const ThreeHook = {
     mounted(){
+
         
     // For example:
     const scene = new THREE.Scene();
@@ -11,7 +12,7 @@ const ThreeHook = {
     const renderer = new THREE.WebGLRenderer();
     camera.position.set(3, 5, 6)
     const controls = new OrbitControls(camera, renderer.domElement)
-    controls.target = new THREE.Vector3(3 ,3 ,3)
+    controls.target = new THREE.Vector3(3 , 3 , 3)
 
     renderer.setSize(window.innerWidth /2 , window.innerHeight/ 2);
     this.el.appendChild(renderer.domElement);
@@ -51,12 +52,13 @@ function onWindowResize(){
   const highlightColor = 0x00ff00
   const cursorColor = 0x0000ff
   const captureColor = 0xff0000
-  //-----
-  const rows = 5
-  const columns = 5
-  const levels = 5
 
-  function render3Dgrid(){
+  //rendering functions
+  function clearScene(){
+    scene.clear()
+  }
+
+  function render3Dgrid(rows, columns, levels){
     const gridGroup = new THREE.Group()
     gridGroup.name = 'gridGroup'
     //generate 3D arr
@@ -79,9 +81,25 @@ function onWindowResize(){
       gridGroup.visible = true;
       scene.add(gridGroup)
     }
-    //
-    render3Dgrid()
-    //
+  
+   //Event listeners from LiveView
+   this.handleEvent("setup_game", (payload) => {
+    const dimensions = payload.board_dimensions
+    const columns = dimensions.columns 
+    const rows = dimensions.rows
+    const levels = dimensions.levels
+    render3Dgrid(columns, rows, levels)
+   })
+
+   this.handleEvent("toggle_grid", (payload) => {
+          const gridGroup = scene.getObjectByName("gridGroup")
+          if (gridGroup.visible){
+              gridGroup.visible = false
+          } else {
+              gridGroup.visible = true
+          }
+          console.log("Yes Toggle", payload)
+    })
 
     const animate = function () {
       requestAnimationFrame(animate);

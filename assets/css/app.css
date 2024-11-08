@@ -4,5 +4,64 @@
 
 /* This file is for your main application CSS */
 #threejs-container{
-background-color: darkorchid;
+background-color: Black;
+}
+
+#players{
+    display: flex;
+}
+
+.player{
+    border: 5px inset brown;
+}
+
+.game-options{
+    display: flex;
+}
+.game-buttons{
+    height: 50px;
+    width: 100px;
+    color: navajowhite;
+    border: 5px outset brown;
+}
+
+.game-buttons-waiting{
+    height: 50px;
+    background-color: lightsalmon;
+    width: 200px;
+    color: navajowhite;
+    cursor: default;
+}
+.player-info{
+    font-size: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: brown;
+    color: navajowhite;
+    height: 50px;
+}
+.join{
+    background-color: green;
+}
+
+
+.decline{
+    background-color: red;
+}
+
+.game-main{
+    display: flex;
+}
+
+.game-chat{
+    display: flex;
+    height: 500px;
+    width: 300px;
+    border: 5px outset brown;
+}
+
+.game-chat-input{
+    width: 300px;
+    border: 5px outset brown;
 }

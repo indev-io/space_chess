@@ -25,4 +25,68 @@ defmodule SpaceChess.Game.DummyData do
   def add_pieces_to_board(board, _count) do
     board
   end
+
+  @ideal_game_data %{
+    game_uuid: 120_123_879,
+    players: [
+      %{
+        id: 123,
+        name: "what"
+      },
+      %{
+        id: 124,
+        name: "who"
+      },
+      %{
+        id: 125,
+        name: "where"
+      }
+    ]
+  }
+
+  @dummy_game_data [
+    %{
+      game_id: "abc123",
+      players: [
+        %{id: 2, name: "devin"},
+        %{id: 4, name: "bizarro_devin"}
+      ],
+      board_dimensions: %{rows: 5, columns: 8, levels: 3}
+    },
+    %{
+      game_id: "def456",
+      players: [
+        %{id: 1, name: "devin"},
+        %{id: 2, name: "Zimzam"},
+        %{id: 4, name: "bizarro_devin"}
+      ],
+      board_dimensions: %{rows: 2, columns: 2, levels: 2}
+    }
+  ]
+
+  @dummy_chat_data [
+    %{
+      game_id: "def456",
+      message: "Yo",
+      sender: "ZimZam"
+    },
+    %{
+      game_id: "def456",
+      message: "Sup",
+      sender: "Bizarro Devin"
+    },
+    %{
+      game_id: "abc123",
+      message: "Good Stuff",
+      sender: "devin"
+    }
+  ]
+
+  def dummy_server_check(game_id) do
+    Enum.find(@dummy_game_data, fn x -> x.game_id === game_id end)
+  end
+
+  def dummy_server_chat(game_id) do
+    Enum.filter(@dummy_chat_data, fn x -> x.game_id === game_id end)
+  end
 end
