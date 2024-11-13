@@ -89,4 +89,15 @@ defmodule SpaceChess.Game.DummyData do
   def dummy_server_chat(game_id) do
     Enum.filter(@dummy_chat_data, fn x -> x.game_id === game_id end)
   end
+
+  def add_chat(chat, socket) do
+    socket.assigns.chat_data ++
+      [
+        %{
+          game_id: "abc123",
+          message: chat,
+          sender: "Devin"
+        }
+      ]
+  end
 end

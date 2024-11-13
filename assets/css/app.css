@@ -65,3 +65,18 @@ background-color: Black;
     width: 300px;
     border: 5px outset brown;
 }
+
+.game-chat{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: flex-end;
+    background-color: rgba(10, 20, 140, 0.1);
+}
+
+.chat-message{
+    padding: 10px;
+    width: 100%;
+    background-color: rgba(10, 20, 140, 0.2);
+    border-radius: 10%;
+}

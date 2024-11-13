@@ -3,8 +3,10 @@ defmodule SpaceChessWeb.GameLive do
   alias SpaceChess.Game.DummyData
   alias SpaceChess.Accounts
 
-  def mount(%{"game_id" => game_id}, %{"user_token" => user_token} = _session, socket) do
+  def mount(%{"game_id" => game_id}, %{"user_token" => user_token}, socket) do
     game_data = DummyData.dummy_server_check(game_id)
+    chat_subscription = "game_chat:" <> game_id
+    SpaceChessWeb.Endpoint.subscribe(chat_subscription)
 
     socket =
       socket
@@ -16,8 +18,7 @@ defmodule SpaceChessWeb.GameLive do
         DummyData.dummy_server_chat(game_id)
       end)
       |> assign(:game_data, game_data)
-
-    IO.inspect(socket)
+      |> assign(:chat_subscription, chat_subscription)
 
     {:ok, socket}
   end
@@ -46,21 +47,22 @@ defmodule SpaceChessWeb.GameLive do
             </div>
           <% end %>
         </div>
-        <div phx-update phx-hook="ThreeHook" id="threejs-container" phx-update="ignore"></div>
+        <div phx-hook="ThreeHook" id="threejs-container" phx-update="ignore"></div>
         <button phx-click="toggle_grid">Toggle Grid</button>
       </div>
       <div class="right">
         <chatarea class="game-chat">
           <%= for chat <- @chat_data do %>
-            <div>
-              <h1><%= chat.message %></h1>
-              <p><%= chat.sender %></p>
+            <div class="chat-message">
+              <p><%= chat.sender %> - <%= chat.message %></p>
             </div>
           <% end %>
         </chatarea>
-        <textarea class="game-chat-input">
+        <form phx-submit="send_message">
+          <textarea class="game-chat-input" name="chat_message">
       </textarea>
-        <button>Send</button>
+          <button>Send</button>
+        </form>
       </div>
     </main>
     """
@@ -70,7 +72,32 @@ defmodule SpaceChessWeb.GameLive do
     {:noreply, push_event(socket, "toggle_grid", %{message: "toggle_grid"})}
   end
 
+  def handle_event("send_message", %{"chat_message" => chat_message}, socket) do
+    new_chat_data =
+      socket.assigns.chat_data ++
+        [
+          %{
+            game_id: socket.assigns.chat_subscription,
+            message: chat_message,
+            sender: "X"
+          }
+        ]
+
+    SpaceChessWeb.Endpoint.broadcast(
+      socket.assigns.chat_subscription,
+      "send_message",
+      new_chat_data
+    )
+
+    {:noreply, socket}
+  end
+
   # def handle_event("unscramble_board", _params, socket) do
   #   {:noreply, push_event(socket, "unscramble_board", %{message: "board_unscrambler"})}
   # end
+
+  def handle_info(info, socket) do
+    socket = assign(socket, :chat_data, info.payload)
+    {:noreply, socket}
+  end
 end
