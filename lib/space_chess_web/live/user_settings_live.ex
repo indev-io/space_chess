@@ -7,10 +7,38 @@ defmodule SpaceChessWeb.UserSettingsLive do
     ~H"""
     <.header class="text-center">
       Account Settings
-      <:subtitle>Manage your account email address and password settings</:subtitle>
+      <:subtitle>Manage your account username, email address, and password settings</:subtitle>
     </.header>
 
     <div class="space-y-12 divide-y">
+      <div>
+        <.simple_form
+          for={@username_form}
+          id="username_form"
+          phx-submit="update_username"
+          phx-change="validate_username"
+        >
+          <.input
+            field={@username_form[:current_username]}
+            value={@current_username}
+            type="text"
+            label="Current Username"
+          />
+          <.input field={@username_form[:new_username]} type="text" label="New Username" required />
+          <.input
+            field={@username_form[:current_password]}
+            name="current_password"
+            id="current_password_for_username"
+            type="password"
+            label="Current password"
+            value={@username_form_current_password}
+            required
+          />
+          <:actions>
+            <.button phx-disable-with="Changing...">Change Username</.button>
+          </:actions>
+        </.simple_form>
+      </div>
       <div>
         <.simple_form
           for={@email_form}
@@ -49,12 +77,6 @@ defmodule SpaceChessWeb.UserSettingsLive do
             id="hidden_user_email"
             value={@current_email}
           />
-          <.input field={@password_form[:password]} type="password" label="New password" required />
-          <.input
-            field={@password_form[:password_confirmation]}
-            type="password"
-            label="Confirm new password"
-          />
           <.input
             field={@password_form[:current_password]}
             name="current_password"
@@ -63,6 +85,12 @@ defmodule SpaceChessWeb.UserSettingsLive do
             id="current_password_for_password"
             value={@current_password}
             required
+          />
+          <.input field={@password_form[:password]} type="password" label="New password" required />
+          <.input
+            field={@password_form[:password_confirmation]}
+            type="password"
+            label="Confirm new password"
           />
           <:actions>
             <.button phx-disable-with="Changing...">Change Password</.button>
@@ -90,14 +118,18 @@ defmodule SpaceChessWeb.UserSettingsLive do
     user = socket.assigns.current_user
     email_changeset = Accounts.change_user_email(user)
     password_changeset = Accounts.change_user_password(user)
+    username_changeset = Accounts.change_user_username(user)
 
     socket =
       socket
       |> assign(:current_password, nil)
       |> assign(:email_form_current_password, nil)
+      |> assign(:username_form_current_password, nil)
+      |> assign(:current_username, user.username)
       |> assign(:current_email, user.email)
       |> assign(:email_form, to_form(email_changeset))
       |> assign(:password_form, to_form(password_changeset))
+      |> assign(:username_form, to_form(username_changeset))
       |> assign(:trigger_submit, false)
 
     {:ok, socket}
@@ -131,7 +163,43 @@ defmodule SpaceChessWeb.UserSettingsLive do
         {:noreply, socket |> put_flash(:info, info) |> assign(email_form_current_password: nil)}
 
       {:error, changeset} ->
+        IO.puts("EMAIL INFO")
+        IO.inspect(changeset)
         {:noreply, assign(socket, :email_form, to_form(Map.put(changeset, :action, :insert)))}
+    end
+  end
+
+  def handle_event("validate_username", params, socket) do
+    %{"current_password" => password, "user" => user_params} = params
+
+    username_form =
+      socket.assigns.current_user
+      |> Accounts.change_user_username(user_params)
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    {:noreply,
+     assign(socket, username_form: username_form, username_form_current_password: password)}
+  end
+
+  def handle_event("update_username", params, socket) do
+    %{"current_password" => password, "user" => user_params} = params
+    new_username = user_params["new_username"]
+    user = socket.assigns.current_user
+
+    case Accounts.update_user_username(user, password, %{username: new_username}) do
+      {:ok, user} ->
+        username_form =
+          user
+          |> Accounts.change_user_username(user_params)
+          |> to_form()
+
+        {:noreply, assign(socket, trigger_submit: true, username_form: username_form)}
+
+      {:error, changeset} ->
+        IO.puts("DEM ERROR")
+        IO.inspect(changeset)
+        {:noreply, assign(socket, username_form: to_form(changeset))}
     end
   end
 
@@ -161,6 +229,8 @@ defmodule SpaceChessWeb.UserSettingsLive do
         {:noreply, assign(socket, trigger_submit: true, password_form: password_form)}
 
       {:error, changeset} ->
+        IO.puts("PASSWORD INFO")
+        IO.inspect(changeset)
         {:noreply, assign(socket, password_form: to_form(changeset))}
     end
   end
