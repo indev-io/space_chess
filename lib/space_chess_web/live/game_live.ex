@@ -1,7 +1,9 @@
 defmodule SpaceChessWeb.GameLive do
+  alias SpaceChess.Game
   use SpaceChessWeb, :live_view
   alias SpaceChess.Game.DummyData
   alias SpaceChess.Accounts
+  alias SpaceChess.GameEngine
 
   def mount(%{"game_id" => game_id}, %{"user_token" => user_token}, socket) do
     game_data = DummyData.dummy_server_check(game_id)
@@ -49,6 +51,7 @@ defmodule SpaceChessWeb.GameLive do
         </div>
         <div phx-hook="ThreeHook" id="threejs-container" phx-update="ignore"></div>
         <button phx-click="toggle_grid">Toggle Grid</button>
+        <button phx-click="update_board">Update Board</button>
       </div>
       <div class="right">
         <chatarea class="game-chat">
@@ -70,6 +73,11 @@ defmodule SpaceChessWeb.GameLive do
 
   def handle_event("toggle_grid", _params, socket) do
     {:noreply, push_event(socket, "toggle_grid", %{message: "toggle_grid"})}
+  end
+
+  def handle_event("update_board", _params, socket) do
+    data = GameEngine.create_default_setup()
+    {:noreply, push_event(socket, "update_board", data)}
   end
 
   def handle_event("send_message", %{"chat_message" => chat_message}, socket) do

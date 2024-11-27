@@ -1,6 +1,7 @@
 import * as THREE from "../../vendor/three/three.module.js"
 import { OrbitControls } from "../../vendor/three/OrbitControls.js"
-// window.THREE = THREE
+//needed for eval
+window.THREE = THREE
 
 const ThreeHook = {
     mounted(){
@@ -10,9 +11,18 @@ const ThreeHook = {
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer();
-    camera.position.set(3, 5, 6)
+
+    //set camera around z axis
+    camera.up.set( 0, 0, 1 );
+    //default pz_py
+    camera.position.set(3, -3, 3)
+    // pz_nx
+    // camera.position.set(9, 3, 3)
+    
     const controls = new OrbitControls(camera, renderer.domElement)
     controls.target = new THREE.Vector3(3 , 3 , 3)
+    // camera.up.set( 0, 0, -1 );
+    camera.lookAt(3, 3, 3)
 
     renderer.setSize(window.innerWidth /2 , window.innerHeight/ 2);
     this.el.appendChild(renderer.domElement);
@@ -33,25 +43,16 @@ function onWindowResize(){
   const color = 0xFFFFFF;
   const intensity = 10;
   const light = new THREE.DirectionalLight(color, intensity);
-  light.position.set(3, 5, 6);
+  light.position.set(3,-5, 6);
   scene.add(light);
   //Ambient Light
   const ambientLight = new THREE.AmbientLight(color, 5);
   scene.add(ambientLight);
   //---
   
-  //Colors
-  const player1color = 0xd4af37 
-  const player2color = 0xc7d1da
-  const player3color = 0xb87333
-  const player4color = 0x00d062
-  const player5color = 0xe0115f
-  const player6color = 0x0f52ba
-  const player7color = 0xffffff
-  const player8color = 0x000000
-  const highlightColor = 0x00ff00
-  const cursorColor = 0x0000ff
-  const captureColor = 0xff0000
+  function changeCameraPosition(){
+
+  }
 
   //rendering functions
   function clearScene(){
@@ -72,8 +73,7 @@ function onWindowResize(){
                     new THREE.LineBasicMaterial({
                         color: new THREE.Color('white')
                     }));
-                //columns and levels switched
-                line.position.set(i,k,j)
+                line.position.set(i + 1, k + 1, j + 1)
                 gridGroup.add(line);
           }
         }
@@ -81,6 +81,10 @@ function onWindowResize(){
       gridGroup.visible = true;
       scene.add(gridGroup)
     }
+
+  function renderBoard(board){
+      console.log("HELLO")
+  }
   
    //Event listeners from LiveView
    this.handleEvent("setup_game", (payload) => {
@@ -89,6 +93,20 @@ function onWindowResize(){
     const rows = dimensions.rows
     const levels = dimensions.levels
     render3Dgrid(columns, rows, levels)
+    const pieces = payload.pieces
+    for (const [piece, info] of Object.entries(pieces)) {
+      // const shape = "BoxGeometry(0.5, 0.5, 0.5)"
+      // const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5)
+      const geometry = eval(`new THREE.${info.model}`)
+      const material = new THREE.MeshStandardMaterial( { color: info.color, roughness: 0.377, metalness: 1} )
+      const obj = new THREE.Mesh( geometry, material );
+
+      scene.add(obj)
+      const [x, y, z] = info.coords
+      obj.position.set(x, y, z)
+      obj.name = piece
+    }
+    
    })
 
    this.handleEvent("toggle_grid", (payload) => {
@@ -101,6 +119,14 @@ function onWindowResize(){
           console.log("Yes Toggle", payload)
     })
 
+    this.handleEvent("update_game", (payload) => {
+      console.log(payload, "PAYLOAD")
+      // renderBoard(payload)
+})
+
+
+
+  //---ANIMATE
     const animate = function () {
       requestAnimationFrame(animate);
       renderer.render(scene, camera);
