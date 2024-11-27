@@ -9,20 +9,22 @@ const ThreeHook = {
         
     // For example:
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer();
 
     //set camera around z axis
+    //default
     camera.up.set( 0, 0, 1 );
-    //default pz_py
     camera.position.set(3, -3, 3)
-    // pz_nx
-    // camera.position.set(9, 3, 3)
+
+    //TEST
+    // camera.up.set( 0, 1, 0 );
+    // camera.position.set(3, 3, 9)
     
-    const controls = new OrbitControls(camera, renderer.domElement)
+    let controls = new OrbitControls(camera, renderer.domElement)
     controls.target = new THREE.Vector3(3 , 3 , 3)
-    // camera.up.set( 0, 0, -1 );
-    camera.lookAt(3, 3, 3)
+    const center = [3, 3, 3]
+    camera.lookAt(center[0], center[1], center[2])
 
     renderer.setSize(window.innerWidth /2 , window.innerHeight/ 2);
     this.el.appendChild(renderer.domElement);
@@ -106,6 +108,8 @@ function onWindowResize(){
       obj.position.set(x, y, z)
       obj.name = piece
     }
+
+    //BE SURE TO UPDATE ROTATION FOR PLAYER
     
    })
 
@@ -119,10 +123,139 @@ function onWindowResize(){
           console.log("Yes Toggle", payload)
     })
 
+
     this.handleEvent("update_game", (payload) => {
       console.log(payload, "PAYLOAD")
       // renderBoard(payload)
 })
+ 
+//rotation hard calculate real positions based on grid size
+
+//CREATE TWo Arrays
+  let current_position = [3, -3, 3]
+  let current_up_direction = [0, 0, 1]
+                      //face, top, back, bottom
+  const longitudinal = [[3, -3, 3], [3, 3, 9], [3, 9, 3], [3, 3, -3]]
+                      //face, right, back, left
+  const latitudinal = [[3, -3, 3], [9, 3, 3], [3, 9, 3], [-3, 3, 3]]
+  const rotation =  0
+
+  function arraysEqual(a, b) {
+    if (a === b) return true;
+    if (a == null || b == null) return false;
+    if (a.length !== b.length) return false;
+    for (var i = 0; i < a.length; ++i) {
+      if (a[i] !== b[i]) return false;
+    }
+    return true;
+  }
+
+  function updatePositionAndUpDirection(position, upDirection){
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(position[0], position[1], position[2])
+    camera.up.set( upDirection[0], upDirection[1], upDirection[2]);
+    controls = new OrbitControls(camera, renderer.domElement)
+    controls.target = new THREE.Vector3(3 , 3 , 3)
+    camera.lookAt(3, 3, 3)
+  }
+
+
+  var current_z_rotation = 0
+  this.handleEvent("spin_left", (payload) => {
+    positions = [[3, -3, 3], [9, 3, 3], [3, 9, 3], [-3, 3, 3]]
+    current_z_rotation += 1
+    if (current_z_rotation > positions.length - 1){
+      current_z_rotation = 0
+    }
+    new_position = positions[current_z_rotation] 
+    camera.position.set(new_position[0], new_position[1] , new_position[2])
+    camera.lookAt(center[0], center[1], center[2])
+
+  })
+
+  this.handleEvent("spin_right", (payload) => {
+    positions = [[3, -3, 3], [9, 3, 3], [3, 9, 3], [-3, 3, 3]]
+    current_z_rotation -= 1
+    if (current_z_rotation < 0){
+      current_z_rotation = positions.length - 1
+    }
+    new_position = positions[current_z_rotation] 
+    camera.position.set(new_position[0], new_position[1] , new_position[2])
+    camera.lookAt(center[0], center[1], center[2])
+
+  })
+
+  var current_y_rotation = 0
+  this.handleEvent("flip_backward", (payload) => {
+    positions = [[3, -3, 3], [3, 3, 9], [3, 9, 3], [3, 3, -3]]
+    ups = [[0, 0, 1], [0, 1, 0], [0, 0, -1], [0, -1, 0]]
+    current_y_rotation += 1
+    if (current_y_rotation > positions.length - 1){
+      current_y_rotation = 0
+    }
+    new_position = positions[current_y_rotation]
+    new_up = ups[current_y_rotation]
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(new_position[0], new_position[1], new_position[2])
+    camera.up.set( new_up[0], new_up[1], new_up[2]);
+    controls = new OrbitControls(camera, renderer.domElement)
+    controls.target = new THREE.Vector3(3 , 3 , 3)
+    camera.lookAt(3, 3, 3)
+  })
+
+  this.handleEvent("flip_forward", (payload) => {
+    positions = [[3, -3, 3], [3, 3, 9], [3, 9, 3], [3, 3, -3]]
+    const ups = [[0, 0, 1], [0, 1, 0], [0, 0, -1], [0, -1, 0]]
+    current_y_rotation -= 1
+    if (current_y_rotation < 0){
+      current_y_rotation = positions.length - 1
+    }
+    new_position = positions[current_y_rotation]
+    const new_up = ups[current_y_rotation]
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(new_position[0], new_position[1], new_position[2])
+    camera.up.set( new_up[0], new_up[1], new_up[2]);
+    controls = new OrbitControls(camera, renderer.domElement)
+    controls.target = new THREE.Vector3(3 , 3 , 3)
+    camera.lookAt(3, 3, 3)
+  })
+
+  var current_x_rotation = 0
+  this.handleEvent("rotate_right", (payload) => {
+    // camera.lookAt(3, 3, 3)
+    current_x_rotation += 1
+    if (current_x_rotation > 3){
+      current_x_rotation = 0
+    }
+
+    console.log("HELLO, IS THERE ANYBODY IN THERE?!")
+    // camera.rotation.z = (Math.PI/2 * current_x_rotation)
+    
+    
+    const ups = [[0, 0, 1], [-1, 0, 0], [0, 0, -1], [1, 0, 0]]
+    const new_up = ups[current_x_rotation]
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.up.set(new_up[0], new_up[1], new_up[2]);
+    controls = new OrbitControls(camera, renderer.domElement)
+    //set current_position
+    camera.position.set(3, -3, 3,)
+    controls.target = new THREE.Vector3(3 , 3 , 3)
+    camera.lookAt(3, 3, 3)
+    
+
+  })
+
+  this.handleEvent("rotate_left", (payload) => {
+    camera.lookAt(3, 3, 3)
+    current_x_rotation -= 1
+    camera.rotation.z = (Math.PI/2 * current_x_rotation)
+    
+  })
+
+
+
+
+
 
 
 

@@ -52,6 +52,12 @@ defmodule SpaceChessWeb.GameLive do
         <div phx-hook="ThreeHook" id="threejs-container" phx-update="ignore"></div>
         <button phx-click="toggle_grid">Toggle Grid</button>
         <button phx-click="update_board">Update Board</button>
+        <button phx-click="spin_left">⇠ spin left</button>
+        <button phx-click="spin_right">spin right ⇢</button>
+        <button phx-click="flip_forward">⇡ flip forward</button>
+        <button phx-click="flip_backward">flip backward ⇣</button>
+        <button phx-click="rotate_left">rotate left ⤣</button>
+        <button phx-click="rotate_right">⤤ rotate right</button>
       </div>
       <div class="right">
         <chatarea class="game-chat">
@@ -78,6 +84,36 @@ defmodule SpaceChessWeb.GameLive do
   def handle_event("update_board", _params, socket) do
     data = GameEngine.create_default_setup()
     {:noreply, push_event(socket, "update_board", data)}
+  end
+
+  def handle_event("spin_right", _params, socket) do
+    board_dimensions = IO.inspect(socket.assigns.game_data.board_dimensions)
+    {:noreply, push_event(socket, "spin_right", board_dimensions)}
+  end
+
+  def handle_event("spin_left", _params, socket) do
+    board_dimensions = IO.inspect(socket.assigns.game_data.board_dimensions)
+    {:noreply, push_event(socket, "spin_left", board_dimensions)}
+  end
+
+  def handle_event("flip_forward", _params, socket) do
+    board_dimensions = IO.inspect(socket.assigns.game_data.board_dimensions)
+    {:noreply, push_event(socket, "flip_forward", board_dimensions)}
+  end
+
+  def handle_event("flip_backward", _params, socket) do
+    board_dimensions = IO.inspect(socket.assigns.game_data.board_dimensions)
+    {:noreply, push_event(socket, "flip_backward", board_dimensions)}
+  end
+
+  def handle_event("rotate_left", _params, socket) do
+    board_dimensions = IO.inspect(socket.assigns.game_data.board_dimensions)
+    {:noreply, push_event(socket, "rotate_left", board_dimensions)}
+  end
+
+  def handle_event("rotate_right", _params, socket) do
+    board_dimensions = IO.inspect(socket.assigns.game_data.board_dimensions)
+    {:noreply, push_event(socket, "rotate_right", board_dimensions)}
   end
 
   def handle_event("send_message", %{"chat_message" => chat_message}, socket) do
