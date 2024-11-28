@@ -41,15 +41,18 @@ function onWindowResize(){
     camera.updateProjectionMatrix();
     renderer.setSize( window.innerWidth * .85, window.innerHeight );
 }
+  //offset
+  const offset = [0, -2, 3]
   //Lights
   const color = 0xFFFFFF;
   const intensity = 10;
   const light = new THREE.DirectionalLight(color, intensity);
-  light.position.set(3,-5, 6);
+  light.position.set(3,-3, 3);
   scene.add(light);
-  //Ambient Light
-  const ambientLight = new THREE.AmbientLight(color, 5);
-  scene.add(ambientLight);
+  //Ambient Light only works with low metalness
+  // const ambientLight = new THREE.AmbientLight(color, 10);
+  // scene.add(ambientLight);
+  // ambientLight.position.set(3, -3, 3)
   //---
   
   function changeCameraPosition(){
@@ -97,10 +100,9 @@ function onWindowResize(){
     render3Dgrid(columns, rows, levels)
     const pieces = payload.pieces
     for (const [piece, info] of Object.entries(pieces)) {
-      // const shape = "BoxGeometry(0.5, 0.5, 0.5)"
-      // const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5)
+
       const geometry = eval(`new THREE.${info.model}`)
-      const material = new THREE.MeshStandardMaterial( { color: info.color, roughness: 0.377, metalness: 1} )
+      const material = new THREE.MeshStandardMaterial( { color: info.color, roughness: 0.477, metalness: 1} )
       const obj = new THREE.Mesh( geometry, material );
 
       scene.add(obj)
@@ -123,22 +125,82 @@ function onWindowResize(){
           console.log("Yes Toggle", payload)
     })
 
-
     this.handleEvent("update_game", (payload) => {
       console.log(payload, "PAYLOAD")
       // renderBoard(payload)
 })
  
 //rotation hard calculate real positions based on grid size
+  let currentUpDirection = [0, 0, 1]
+  let currentFacingDirection = [0, 1, 0]
 
-//CREATE TWo Arrays
-  let current_position = [3, -3, 3]
-  let current_up_direction = [0, 0, 1]
-                      //face, top, back, bottom
-  const longitudinal = [[3, -3, 3], [3, 3, 9], [3, 9, 3], [3, 3, -3]]
-                      //face, right, back, left
-  const latitudinal = [[3, -3, 3], [9, 3, 3], [3, 9, 3], [-3, 3, 3]]
-  const rotation =  0
+  const rotationInfo = [
+    {up: [1, 0, 0], facing: [0, 1, 0], position: [3, -3, 3]},
+    {up: [1, 0, 0], facing: [0, -1, 0],  position: [3, 9, 3]},
+    {up: [1, 0, 0], facing: [0, 0, 1], position: [3, 3, -3]},
+    {up: [1, 0, 0], facing: [0, 0, -1], position: [3, 3, 9]},
+    {up: [-1, 0, 0], facing: [0, 1, 0], position: [3, -3, 3]},
+    {up: [-1, 0, 0], facing: [0, -1, 0], position: [3, 9, 3]},
+    {up: [-1, 0, 0], facing: [0, 0, 1], position: [3, 3, -3]},
+    {up: [-1, 0, 0], facing: [0, 0, -1], position: [3, 3, 9]},
+    {up: [0, 1, 0], facing: [1, 0, 0], position: [-3, 3, 3] },
+    {up: [0, 1, 0], facing: [-1, 0, 0], position: [9, 3, 3]},
+    {up: [0, 1, 0], facing: [0, 0, 1], position: [3, 3, -3]},
+    {up: [0, 1, 0], facing: [0, 0, -1], position: [3, 3, 9]},
+    {up: [0, -1, 0], facing: [1, 0, 0], position: [-3, 3, 3] },
+    {up: [0, -1, 0], facing: [-1, 0, 0], position: [9, 3, 3]},
+    {up: [0, -1, 0], facing: [0, 0, 1], position: [3, 3, -3]},
+    {up: [0, -1, 0], facing: [0, 0, -1], position: [3, 3, 9]},
+    {up: [0, 0, 1], facing: [1, 0, 0], position: [-3, 3, 3] },
+    {up: [0, 0, 1], facing: [-1, 0, 0], position: [9, 3, 3]},
+    {up: [0, 0, 1], facing: [0, 1, 0], position: [3, -3, 3]},
+    {up: [0, 0, 1], facing: [0, -1, 0], position: [3, 9, 3]},
+    {up: [0, 0, -1], facing: [1, 0, 0], position: [-3, 3, 3]},
+    {up: [0, 0, -1], facing: [-1, 0, 0], position: [9, 3, 3]},
+    {up: [0, 0, -1], facing: [0, 1, 0], position: [3, -3, 3]},
+    {up: [0, 0, -1], facing: [0, -1, 0], position: [3, 9, 3]},
+  ]
+
+  function getPositionFromRotationInfo(up, facing){
+    for (let i = 0; i < rotationInfo.length; i++){
+      if (arraysEqual(rotationInfo[i]["up"], up) && arraysEqual(rotationInfo[i]["facing"], facing)){
+        console.log(i, "LOOKUP")
+        return rotationInfo[i]["position"]
+      }
+    }
+  }
+
+  function rotate90DegreesClockwiseAlongXAxis(coordinates){
+    const [x, y, z] = coordinates
+    return [x, -z, y]
+  }
+
+  function rotate90DegreesCounterclockwiseAlongXAxis(coordinates){
+    const [x, y, z] = coordinates
+    return[x, z, -y]
+  }
+
+  function rotate90DegreesClockwiseAlongYAxis(coordinates){
+    const [x, y, z] = coordinates
+    return [-z, y, x]
+  }
+  
+  function rotate90DegreesCounterclockwiseAlongYAxis(coordinates){
+      const [x, y, z] = coordinates
+      return [z, y, -x]
+  }
+
+  function rotate90DegreesClockwiseAlongZAxis(coordinates){
+    const [x, y, z] = coordinates
+    return [y, -x, z]
+  }
+  
+  function rotate90DegreesCounterclockwiseAlongZAxis(coordinates){
+      const [x, y, z] = coordinates
+      return [-y, x, z]
+      return coordinates
+  }
+
 
   function arraysEqual(a, b) {
     if (a === b) return true;
@@ -150,106 +212,301 @@ function onWindowResize(){
     return true;
   }
 
-  function updatePositionAndUpDirection(position, upDirection){
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(position[0], position[1], position[2])
-    camera.up.set( upDirection[0], upDirection[1], upDirection[2]);
-    controls = new OrbitControls(camera, renderer.domElement)
-    controls.target = new THREE.Vector3(3 , 3 , 3)
-    camera.lookAt(3, 3, 3)
+  //obj {up: , face:}
+  function hasMatchingMatrix(arrOfObj, obj){
+    for (let i = 0; i < arrOfObj.length; i++){
+      if (arraysEqual(arrOfObj[i]["up"], obj["up"]) && arraysEqual(arrOfObj[i]["facing"], obj["facing"])){
+        return true
+      }
+    }
+    return false
   }
 
+  function updatePositionAndUpDirection(upDirection, facingDirection){
+      currentUpDirection = upDirection
+      currentFacingDirection = facingDirection
+      const currentPosition = getPositionFromRotationInfo(upDirection, facingDirection)
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(currentPosition[0], currentPosition[1], currentPosition[2])
+      light.position.set(currentPosition[0], currentPosition[1], currentPosition[2]);
+      camera.up.set( upDirection[0], upDirection[1], upDirection[2]);
+      controls = new OrbitControls(camera, renderer.domElement)
+      controls.target = new THREE.Vector3(center[0], center[1], center[2])
+      camera.lookAt(center[0], center[1], center[2])
+  }
 
-  var current_z_rotation = 0
   this.handleEvent("spin_left", (payload) => {
-    positions = [[3, -3, 3], [9, 3, 3], [3, 9, 3], [-3, 3, 3]]
-    current_z_rotation += 1
-    if (current_z_rotation > positions.length - 1){
-      current_z_rotation = 0
-    }
-    new_position = positions[current_z_rotation] 
-    camera.position.set(new_position[0], new_position[1] , new_position[2])
-    camera.lookAt(center[0], center[1], center[2])
+    if (arraysEqual(currentUpDirection, [0, 0, 1])){
+      let newPosition = rotate90DegreesCounterclockwiseAlongZAxis(currentFacingDirection)
+      updatePositionAndUpDirection(currentUpDirection, newPosition)
+      return 
+    } 
+    if (arraysEqual(currentUpDirection, [0, 0, -1])){
+      let newPosition = rotate90DegreesClockwiseAlongZAxis(currentFacingDirection)
+      updatePositionAndUpDirection(currentUpDirection, newPosition)
+      return 
+    } 
 
+    if (arraysEqual(currentUpDirection, [0, 1, 0])){
+      let newPosition = rotate90DegreesCounterclockwiseAlongYAxis(currentFacingDirection)
+      updatePositionAndUpDirection(currentUpDirection, newPosition)
+      return 
+    }
+
+    if (arraysEqual(currentUpDirection, [0, -1, 0])){
+      let newPosition = rotate90DegreesClockwiseAlongYAxis(currentFacingDirection)
+      updatePositionAndUpDirection(currentUpDirection, newPosition)
+      return 
+    }
+
+    if (arraysEqual(currentUpDirection, [-1, 0, 0])){
+      let newPosition = rotate90DegreesCounterclockwiseAlongXAxis(currentFacingDirection)
+      updatePositionAndUpDirection(currentUpDirection, newPosition)
+      return 
+    }
+
+    if (arraysEqual(currentUpDirection, [1, 0, 0])){
+      let newPosition = rotate90DegreesClockwiseAlongXAxis(currentFacingDirection)
+      updatePositionAndUpDirection(currentUpDirection, newPosition)
+      return 
+    }
+    
   })
 
   this.handleEvent("spin_right", (payload) => {
-    positions = [[3, -3, 3], [9, 3, 3], [3, 9, 3], [-3, 3, 3]]
-    current_z_rotation -= 1
-    if (current_z_rotation < 0){
-      current_z_rotation = positions.length - 1
-    }
-    new_position = positions[current_z_rotation] 
-    camera.position.set(new_position[0], new_position[1] , new_position[2])
-    camera.lookAt(center[0], center[1], center[2])
+    if (arraysEqual(currentUpDirection, [0, 0, -1])){
+      let newPosition = rotate90DegreesCounterclockwiseAlongZAxis(currentFacingDirection)
+      updatePositionAndUpDirection(currentUpDirection, newPosition)
+      return 
+    } 
+    if (arraysEqual(currentUpDirection, [0, 0, 1])){
+      let newPosition = rotate90DegreesClockwiseAlongZAxis(currentFacingDirection)
+      updatePositionAndUpDirection(currentUpDirection, newPosition)
+      return 
+    } 
 
+    if (arraysEqual(currentUpDirection, [0, -1, 0])){
+      let newPosition = rotate90DegreesCounterclockwiseAlongYAxis(currentFacingDirection)
+      updatePositionAndUpDirection(currentUpDirection, newPosition)
+      return 
+    }
+
+    if (arraysEqual(currentUpDirection, [0, 1, 0])){
+      let newPosition = rotate90DegreesClockwiseAlongYAxis(currentFacingDirection)
+      updatePositionAndUpDirection(currentUpDirection, newPosition)
+      return 
+    }
+
+    if (arraysEqual(currentUpDirection, [1, 0, 0])){
+      let newPosition = rotate90DegreesCounterclockwiseAlongXAxis(currentFacingDirection)
+      updatePositionAndUpDirection(currentUpDirection, newPosition)
+      return 
+    }
+
+    if (arraysEqual(currentUpDirection, [-1, 0, 0])){
+      let newPosition = rotate90DegreesClockwiseAlongXAxis(currentFacingDirection)
+      updatePositionAndUpDirection(currentUpDirection, newPosition)
+      return 
+    }
   })
-
-  var current_y_rotation = 0
+  
   this.handleEvent("flip_backward", (payload) => {
-    positions = [[3, -3, 3], [3, 3, 9], [3, 9, 3], [3, 3, -3]]
-    ups = [[0, 0, 1], [0, 1, 0], [0, 0, -1], [0, -1, 0]]
-    current_y_rotation += 1
-    if (current_y_rotation > positions.length - 1){
-      current_y_rotation = 0
-    }
-    new_position = positions[current_y_rotation]
-    new_up = ups[current_y_rotation]
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(new_position[0], new_position[1], new_position[2])
-    camera.up.set( new_up[0], new_up[1], new_up[2]);
-    controls = new OrbitControls(camera, renderer.domElement)
-    controls.target = new THREE.Vector3(3 , 3 , 3)
-    camera.lookAt(3, 3, 3)
+    const a = [{up: [0, 0, 1], facing: [0, 1, 0]}, {up: [0, 1, 0], facing: [0, 0, -1]}, {up: [0, 0, -1], facing: [0, -1, 0]}, {up: [0, -1, 0], facing: [0, 0, 1]}]
+      if (hasMatchingMatrix(a, {up: currentUpDirection, facing: currentFacingDirection})){
+        let newUpDirection = rotate90DegreesCounterclockwiseAlongXAxis(currentUpDirection)
+        let newFacingDirection = rotate90DegreesCounterclockwiseAlongXAxis(currentFacingDirection)
+        updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+        return 
+      }
+    const b = [{up: [0, 0, 1], facing: [1, 0, 0]}, {up: [1, 0, 0], facing: [0, 0, -1]}, {up: [0, 0, -1], facing: [-1, 0, 0]}, {up: [-1, 0, 0], facing: [0, 0, 1]}]
+    //-----
+    if (hasMatchingMatrix(b, {up: currentUpDirection, facing: currentFacingDirection})){
+      let newUpDirection = rotate90DegreesCounterclockwiseAlongYAxis(currentUpDirection)
+      let newFacingDirection = rotate90DegreesCounterclockwiseAlongYAxis(currentFacingDirection)
+      updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      return 
+    } 
+    const c = [{up: [0, 0, 1], facing: [0, -1, 0]}, {up: [0, -1, 0], facing: [0, 0, -1]}, {up: [0, 0, -1], facing: [0, 1, 0]}, {up: [0, 1, 0], facing: [0, 0, 1]}]
+    //-----
+    if (hasMatchingMatrix(c, {up: currentUpDirection, facing: currentFacingDirection})){
+      let newUpDirection = rotate90DegreesClockwiseAlongXAxis(currentUpDirection)
+      let newFacingDirection = rotate90DegreesClockwiseAlongXAxis(currentFacingDirection)
+      updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      return 
+    } 
+
+    const d = [{up: [0, 0, 1], facing: [-1, 0, 0]}, {up: [-1, 0, 0], facing: [0, 0, -1]}, {up: [0, 0, -1], facing: [1, 0, 0]}, {up: [1, 0, 0], facing: [0, 0, 1]}]
+
+    if (hasMatchingMatrix(d, {up: currentUpDirection, facing: currentFacingDirection})){
+      let newUpDirection = rotate90DegreesClockwiseAlongYAxis(currentUpDirection)
+      let newFacingDirection = rotate90DegreesClockwiseAlongYAxis(currentFacingDirection)
+      updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      return 
+    } 
+
+    const e = [{up: [0, 1, 0], facing: [-1, 0, 0]}, {up: [-1, 0, 0], facing: [0, -1, 0]}, {up: [0, -1, 0], facing: [1, 0, 0]}, {up: [1, 0, 0], facing: [0, 1, 0]}]
+
+    if (hasMatchingMatrix(e, {up: currentUpDirection, facing: currentFacingDirection})){
+      let newUpDirection = rotate90DegreesCounterclockwiseAlongZAxis(currentUpDirection)
+      let newFacingDirection = rotate90DegreesCounterclockwiseAlongZAxis(currentFacingDirection)
+      updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      return 
+    } 
+
+    const f = [{up: [0, 1, 0], facing: [1, 0, 0]}, {up: [1, 0, 0], facing: [0, -1, 0]}, {up: [0, -1, 0], facing: [-1, 0, 0]}, {up: [-1, 0, 0], facing: [0, 1, 0]}]
+
+    if (hasMatchingMatrix(f, {up: currentUpDirection, facing: currentFacingDirection})){
+      let newUpDirection = rotate90DegreesClockwiseAlongZAxis(currentUpDirection)
+      let newFacingDirection = rotate90DegreesClockwiseAlongZAxis(currentFacingDirection)
+      updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      return 
+    } 
   })
 
   this.handleEvent("flip_forward", (payload) => {
-    positions = [[3, -3, 3], [3, 3, 9], [3, 9, 3], [3, 3, -3]]
-    const ups = [[0, 0, 1], [0, 1, 0], [0, 0, -1], [0, -1, 0]]
-    current_y_rotation -= 1
-    if (current_y_rotation < 0){
-      current_y_rotation = positions.length - 1
-    }
-    new_position = positions[current_y_rotation]
-    const new_up = ups[current_y_rotation]
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(new_position[0], new_position[1], new_position[2])
-    camera.up.set( new_up[0], new_up[1], new_up[2]);
-    controls = new OrbitControls(camera, renderer.domElement)
-    controls.target = new THREE.Vector3(3 , 3 , 3)
-    camera.lookAt(3, 3, 3)
+    const a = [{up: [0, 0, 1], facing: [0, 1, 0]}, {up: [0, 1, 0], facing: [0, 0, -1]}, {up: [0, 0, -1], facing: [0, -1, 0]}, {up: [0, -1, 0], facing: [0, 0, 1]}]
+      if (hasMatchingMatrix(a, {up: currentUpDirection, facing: currentFacingDirection})){
+        let newUpDirection = rotate90DegreesClockwiseAlongXAxis(currentUpDirection)
+        let newFacingDirection = rotate90DegreesClockwiseAlongXAxis(currentFacingDirection)
+        updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+        return 
+      }
+    const b = [{up: [0, 0, 1], facing: [1, 0, 0]}, {up: [1, 0, 0], facing: [0, 0, -1]}, {up: [0, 0, -1], facing: [-1, 0, 0]}, {up: [-1, 0, 0], facing: [0, 0, 1]}]
+    //-----
+    if (hasMatchingMatrix(b, {up: currentUpDirection, facing: currentFacingDirection})){
+      let newUpDirection = rotate90DegreesClockwiseAlongYAxis(currentUpDirection)
+      let newFacingDirection = rotate90DegreesClockwiseAlongYAxis(currentFacingDirection)
+      updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      return 
+    } 
+    const c = [{up: [0, 0, 1], facing: [0, -1, 0]}, {up: [0, -1, 0], facing: [0, 0, -1]}, {up: [0, 0, -1], facing: [0, 1, 0]}, {up: [0, 1, 0], facing: [0, 0, 1]}]
+    //-----
+    if (hasMatchingMatrix(c, {up: currentUpDirection, facing: currentFacingDirection})){
+      let newUpDirection = rotate90DegreesCounterclockwiseAlongXAxis(currentUpDirection)
+      let newFacingDirection = rotate90DegreesCounterclockwiseAlongXAxis(currentFacingDirection)
+      updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      return 
+    } 
+
+    const d = [{up: [0, 0, 1], facing: [-1, 0, 0]}, {up: [-1, 0, 0], facing: [0, 0, -1]}, {up: [0, 0, -1], facing: [1, 0, 0]}, {up: [1, 0, 0], facing: [0, 0, 1]}]
+
+    if (hasMatchingMatrix(d, {up: currentUpDirection, facing: currentFacingDirection})){
+      let newUpDirection = rotate90DegreesCounterclockwiseAlongYAxis(currentUpDirection)
+      let newFacingDirection = rotate90DegreesCounterclockwiseAlongYAxis(currentFacingDirection)
+      updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      return 
+    } 
+
+    const e = [{up: [0, 1, 0], facing: [-1, 0, 0]}, {up: [-1, 0, 0], facing: [0, -1, 0]}, {up: [0, -1, 0], facing: [1, 0, 0]}, {up: [1, 0, 0], facing: [0, 1, 0]}]
+
+    if (hasMatchingMatrix(e, {up: currentUpDirection, facing: currentFacingDirection})){
+      let newUpDirection = rotate90DegreesClockwiseAlongZAxis(currentUpDirection)
+      let newFacingDirection = rotate90DegreesClockwiseAlongZAxis(currentFacingDirection)
+      updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      return 
+    } 
+
+    const f = [{up: [0, 1, 0], facing: [1, 0, 0]}, {up: [1, 0, 0], facing: [0, -1, 0]}, {up: [0, -1, 0], facing: [-1, 0, 0]}, {up: [-1, 0, 0], facing: [0, 1, 0]}]
+
+    if (hasMatchingMatrix(f, {up: currentUpDirection, facing: currentFacingDirection})){
+      let newUpDirection = rotate90DegreesCounterclockwiseAlongZAxis(currentUpDirection)
+      let newFacingDirection = rotate90DegreesCounterclockwiseAlongZAxis(currentFacingDirection)
+      updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      return 
+    } 
   })
 
-  var current_x_rotation = 0
-  this.handleEvent("rotate_right", (payload) => {
-    // camera.lookAt(3, 3, 3)
-    current_x_rotation += 1
-    if (current_x_rotation > 3){
-      current_x_rotation = 0
-    }
-
-    console.log("HELLO, IS THERE ANYBODY IN THERE?!")
-    // camera.rotation.z = (Math.PI/2 * current_x_rotation)
-    
-    
-    const ups = [[0, 0, 1], [-1, 0, 0], [0, 0, -1], [1, 0, 0]]
-    const new_up = ups[current_x_rotation]
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.up.set(new_up[0], new_up[1], new_up[2]);
-    controls = new OrbitControls(camera, renderer.domElement)
-    //set current_position
-    camera.position.set(3, -3, 3,)
-    controls.target = new THREE.Vector3(3 , 3 , 3)
-    camera.lookAt(3, 3, 3)
-    
-
-  })
-
+  let current_x_rotation = 0
   this.handleEvent("rotate_left", (payload) => {
-    camera.lookAt(3, 3, 3)
-    current_x_rotation -= 1
-    camera.rotation.z = (Math.PI/2 * current_x_rotation)
-    
+    console.log(currentUpDirection, currentFacingDirection)
+    const a = [{up: [0, 0, 1], facing: [0, 1, 0]}, {up: [1, 0, 0], facing: [0, 1, 0]}, {up: [0, 0, -1], facing: [0, 1, 0]}, {up: [-1, 0, 0], facing: [0, 1, 0]}]
+    if (hasMatchingMatrix(a, {up: currentUpDirection, facing: currentFacingDirection})){
+      let newUpDirection = rotate90DegreesCounterclockwiseAlongYAxis(currentUpDirection)
+      let newFacingDirection = rotate90DegreesCounterclockwiseAlongYAxis(currentFacingDirection)
+      updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      return 
+    }
+    const b = [{up: [0, 0, 1], facing: [1, 0, 0]}, {up: [0, -1, 0], facing: [1, 0, 0]}, {up: [0, 0, -1], facing: [1, 0, 0]}, {up: [0, 1, 0], facing: [1, 0, 0]},]
+    if (hasMatchingMatrix(b, {up: currentUpDirection, facing: currentFacingDirection})){
+      let newUpDirection = rotate90DegreesClockwiseAlongXAxis(currentUpDirection)
+      let newFacingDirection = rotate90DegreesClockwiseAlongXAxis(currentFacingDirection)
+      updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      return 
+    } 
+    const c = [{up: [0, 0, 1], facing: [0, -1, 0]}, {up: [1, 0, 0], facing: [0, -1, 0]}, {up: [0, 0, -1], facing: [0, -1, 0]}, {up: [-1, 0, 0], facing: [0, -1, 0]}]
+    if (hasMatchingMatrix(c, {up: currentUpDirection, facing: currentFacingDirection})){
+      let newUpDirection = rotate90DegreesClockwiseAlongYAxis(currentUpDirection)
+      let newFacingDirection = rotate90DegreesClockwiseAlongYAxis(currentFacingDirection)
+      updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      return 
+    } 
+    const d = [{up: [0, 0, 1], facing: [-1, 0, 0]}, {up: [0, -1, 0], facing: [-1, 0, 0]}, {up: [0, 0, -1], facing: [-1, 0, 0]}, {up: [0, 1, 0], facing: [-1, 0, 0]}]
+    if (hasMatchingMatrix(d, {up: currentUpDirection, facing: currentFacingDirection})){
+      let newUpDirection = rotate90DegreesCounterclockwiseAlongXAxis(currentUpDirection)
+      let newFacingDirection = rotate90DegreesCounterclockwiseAlongXAxis(currentFacingDirection)
+      updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      return 
+    } 
+    const e = [{up: [1, 0, 0], facing: [0, 0, -1]}, {up: [0, -1, 0], facing: [0, 0, -1]}, {up: [-1, 0, 0], facing: [0, 0, -1]}, {up: [0, 1, 0], facing: [0, 0, -1]}]
+    if (hasMatchingMatrix(e, {up: currentUpDirection, facing: currentFacingDirection})){
+      let newUpDirection = rotate90DegreesClockwiseAlongZAxis(currentUpDirection)
+      let newFacingDirection = rotate90DegreesClockwiseAlongZAxis(currentFacingDirection)
+      updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      return 
+    } 
+    const f = [{up: [1, 0, 0], facing: [0, 0, 1]}, {up: [0, -1, 0], facing: [0, 0, 1]}, {up: [-1, 0, 0], facing: [0, 0, 1]}, {up: [0, 1, 0], facing: [0, 0, 1]}]
+    if (hasMatchingMatrix(f, {up: currentUpDirection, facing: currentFacingDirection})){
+      let newUpDirection = rotate90DegreesCounterclockwiseAlongZAxis(currentUpDirection)
+      let newFacingDirection = rotate90DegreesCounterclockwiseAlongZAxis(currentFacingDirection)
+      updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      return 
+    } 
+  })
+
+  this.handleEvent("rotate_right", (payload) => {
+    console.log(currentUpDirection, currentFacingDirection)
+    const a = [{up: [0, 0, 1], facing: [0, 1, 0]}, {up: [1, 0, 0], facing: [0, 1, 0]}, {up: [0, 0, -1], facing: [0, 1, 0]}, {up: [-1, 0, 0], facing: [0, 1, 0]}]
+    if (hasMatchingMatrix(a, {up: currentUpDirection, facing: currentFacingDirection})){
+      let newUpDirection = rotate90DegreesClockwiseAlongYAxis(currentUpDirection)
+      let newFacingDirection = rotate90DegreesClockwiseAlongYAxis(currentFacingDirection)
+      updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      return 
+    }
+    const b = [{up: [0, 0, 1], facing: [1, 0, 0]}, {up: [0, -1, 0], facing: [1, 0, 0]}, {up: [0, 0, -1], facing: [1, 0, 0]}, {up: [0, 1, 0], facing: [1, 0, 0]},]
+    if (hasMatchingMatrix(b, {up: currentUpDirection, facing: currentFacingDirection})){
+      let newUpDirection = rotate90DegreesCounterclockwiseAlongXAxis(currentUpDirection)
+      let newFacingDirection = rotate90DegreesCounterclockwiseAlongXAxis(currentFacingDirection)
+      updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      return 
+    } 
+    const c = [{up: [0, 0, 1], facing: [0, -1, 0]}, {up: [1, 0, 0], facing: [0, -1, 0]}, {up: [0, 0, -1], facing: [0, -1, 0]}, {up: [-1, 0, 0], facing: [0, -1, 0]}]
+    if (hasMatchingMatrix(c, {up: currentUpDirection, facing: currentFacingDirection})){
+      let newUpDirection = rotate90DegreesCounterclockwiseAlongYAxis(currentUpDirection)
+      let newFacingDirection = rotate90DegreesCounterclockwiseAlongYAxis(currentFacingDirection)
+      updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      return 
+    } 
+    const d = [{up: [0, 0, 1], facing: [-1, 0, 0]}, {up: [0, -1, 0], facing: [-1, 0, 0]}, {up: [0, 0, -1], facing: [-1, 0, 0]}, {up: [0, 1, 0], facing: [-1, 0, 0]}]
+    if (hasMatchingMatrix(d, {up: currentUpDirection, facing: currentFacingDirection})){
+      let newUpDirection = rotate90DegreesClockwiseAlongXAxis(currentUpDirection)
+      let newFacingDirection = rotate90DegreesClockwiseAlongXAxis(currentFacingDirection)
+      updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      return 
+    } 
+    const e = [{up: [1, 0, 0], facing: [0, 0, -1]}, {up: [0, -1, 0], facing: [0, 0, -1]}, {up: [-1, 0, 0], facing: [0, 0, -1]}, {up: [0, 1, 0], facing: [0, 0, -1]}]
+    if (hasMatchingMatrix(e, {up: currentUpDirection, facing: currentFacingDirection})){
+      let newUpDirection = rotate90DegreesCounterclockwiseAlongZAxis(currentUpDirection)
+      let newFacingDirection = rotate90DegreesCounterclockwiseAlongZAxis(currentFacingDirection)
+      updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      return 
+    } 
+    const f = [{up: [1, 0, 0], facing: [0, 0, 1]}, {up: [0, -1, 0], facing: [0, 0, 1]}, {up: [-1, 0, 0], facing: [0, 0, 1]}, {up: [0, 1, 0], facing: [0, 0, 1]}]
+    if (hasMatchingMatrix(f, {up: currentUpDirection, facing: currentFacingDirection})){
+      let newUpDirection = rotate90DegreesClockwiseAlongZAxis(currentUpDirection)
+      let newFacingDirection = rotate90DegreesClockwiseAlongZAxis(currentFacingDirection)
+      updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      return 
+    } 
   })
 
 
