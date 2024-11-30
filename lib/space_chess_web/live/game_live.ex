@@ -27,7 +27,7 @@ defmodule SpaceChessWeb.GameLive do
 
   def render(assigns) do
     ~H"""
-    <main class="game-main">
+    <main phx-window-keydown="keydown" class="game-main">
       <div class="left">
         <h1>Game Status: Awaiting Players</h1>
         <div id="players">
@@ -77,6 +77,7 @@ defmodule SpaceChessWeb.GameLive do
     """
   end
 
+  # buttons
   def handle_event("toggle_grid", _params, socket) do
     {:noreply, push_event(socket, "toggle_grid", %{message: "toggle_grid"})}
   end
@@ -136,9 +137,10 @@ defmodule SpaceChessWeb.GameLive do
     {:noreply, socket}
   end
 
-  # def handle_event("unscramble_board", _params, socket) do
-  #   {:noreply, push_event(socket, "unscramble_board", %{message: "board_unscrambler"})}
-  # end
+  # keys
+  def handle_event("keydown", %{"key" => key}, socket) do
+    {:noreply, push_event(socket, "keydown", %{key: key})}
+  end
 
   def handle_info(info, socket) do
     socket = assign(socket, :chat_data, info.payload)

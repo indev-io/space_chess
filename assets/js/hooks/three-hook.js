@@ -12,15 +12,9 @@ const ThreeHook = {
     let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer();
 
-    //set camera around z axis
-    //default
     camera.up.set( 0, 0, 1 );
     camera.position.set(3, -3, 3)
 
-    //TEST
-    // camera.up.set( 0, 1, 0 );
-    // camera.position.set(3, 3, 9)
-    
     let controls = new OrbitControls(camera, renderer.domElement)
     controls.target = new THREE.Vector3(3 , 3 , 3)
     const center = [3, 3, 3]
@@ -30,9 +24,6 @@ const ThreeHook = {
     this.el.appendChild(renderer.domElement);
     renderer.setClearColor(0x000000, 0)
 
-    const geometry = new THREE.BoxGeometry();
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-
     //Window resizing
     window.addEventListener( 'resize', onWindowResize, false );
 
@@ -41,6 +32,8 @@ function onWindowResize(){
     camera.updateProjectionMatrix();
     renderer.setSize( window.innerWidth * .85, window.innerHeight );
 }
+
+
   //offset
   const offset = [0, -2, 3]
   //Lights
@@ -49,20 +42,36 @@ function onWindowResize(){
   const light = new THREE.DirectionalLight(color, intensity);
   light.position.set(3,-3, 3);
   scene.add(light);
-  //Ambient Light only works with low metalness
-  // const ambientLight = new THREE.AmbientLight(color, 10);
-  // scene.add(ambientLight);
-  // ambientLight.position.set(3, -3, 3)
+  //--Ambient light only affects non-metallic items, should be set at the center and not change
+  const ambientLight = new THREE.AmbientLight(color, 5);
+  ambientLight.position.set(3, 3, 3);
+  scene.add(ambientLight);
   //---
-  
-  function changeCameraPosition(){
-
+  //GLOBAL VALUES
+  let dimensions;
+  let cursorPosition = center
+  let cursorTransformations = {
+    "up" : [0, 0, 1],
+    "down": [0, 0, -1],
+    "left": [-1, 0, 0],
+    "right": [1, 0, 0],
+    "backward": [0, -1, 0],
+    "forward": [0, 1, 0] 
   }
-
+//-----GLOBAL VALUES
   //rendering functions
   function clearScene(){
     scene.clear()
   }
+
+  function addCursorCube(x,y,z){
+    const geometry = new THREE.BoxGeometry( 1, 1, 1);
+    const material = new THREE.MeshLambertMaterial( { color: 0x0000ff, transparent: true, opacity: 0.6} );
+    const o = new THREE.Mesh( geometry, material );
+    scene.add( o );
+    o.position.set(x,y,z)
+    o.name = 'cursor'   
+}
 
   function render3Dgrid(rows, columns, levels){
     const gridGroup = new THREE.Group()
@@ -90,10 +99,11 @@ function onWindowResize(){
   function renderBoard(board){
       console.log("HELLO")
   }
-  
-   //Event listeners from LiveView
-   this.handleEvent("setup_game", (payload) => {
-    const dimensions = payload.board_dimensions
+
+  //primitive
+  function renderBoard(payload){
+    // scene.clear()
+    dimensions = payload.board_dimensions
     const columns = dimensions.columns 
     const rows = dimensions.rows
     const levels = dimensions.levels
@@ -110,9 +120,13 @@ function onWindowResize(){
       obj.position.set(x, y, z)
       obj.name = piece
     }
-
-    //BE SURE TO UPDATE ROTATION FOR PLAYER
     
+  }
+  
+   //Event listeners from LiveView
+   this.handleEvent("setup_game", (payload) => {
+    renderBoard(payload)
+    addCursorCube(center[0], center[1], center[2])
    })
 
    this.handleEvent("toggle_grid", (payload) => {
@@ -129,6 +143,8 @@ function onWindowResize(){
       console.log(payload, "PAYLOAD")
       // renderBoard(payload)
 })
+
+//For cursor movement
  
 //rotation hard calculate real positions based on grid size
   let currentUpDirection = [0, 0, 1]
@@ -198,7 +214,60 @@ function onWindowResize(){
   function rotate90DegreesCounterclockwiseAlongZAxis(coordinates){
       const [x, y, z] = coordinates
       return [-y, x, z]
-      return coordinates
+  }
+
+  function applyTransformationToPosition(transformation, position){
+    const [a, b, c] = transformation
+    const [x, y, z] = position
+    return [a + x, b + y, c + z]
+  }
+
+  function positionInBounds(position){
+    const [x, y, z] = position
+    if (x < 1){
+      return false
+    }
+    if (y < 1){
+      return false
+    }
+    if (z < 1){
+      return false
+    }
+    if (x > dimensions.rows){
+      return false
+    }
+    if (y > dimensions.columns){
+      return false
+    }
+    if (z > dimensions.levels){
+      return false
+    }
+    return true
+  }
+
+
+  function updateCursorTransformation(rotationFunction){
+    let newCursorTransformations = {}
+    for (const [movement, transformation] of Object.entries(cursorTransformations)) {
+      newCursorTransformations[movement] = rotationFunction(transformation)
+    }
+    cursorTransformations = newCursorTransformations
+  }
+
+  function updateCursorPosition(rotationFunction){
+    const [a, b, c] = center
+    const [x, y, z] = cursorPosition
+    const translatedPosition = [x - a, y - b, z - c]
+    const [newX, newY, newZ] = rotationFunction(translatedPosition)
+    const newPosition = [newX + a, newY + b, newZ + c]
+    cursorPosition = newPosition
+    const [posX, posY, posZ] = newPosition
+    const cursor = scene.getObjectByName('cursor')
+    cursor.position.set(posX, posY, posZ)
+  }
+
+  function putPositionInBounds(){
+
   }
 
 
@@ -235,39 +304,52 @@ function onWindowResize(){
       camera.lookAt(center[0], center[1], center[2])
   }
 
+  //HANDLE EVENTS
   this.handleEvent("spin_left", (payload) => {
     if (arraysEqual(currentUpDirection, [0, 0, 1])){
       let newPosition = rotate90DegreesCounterclockwiseAlongZAxis(currentFacingDirection)
       updatePositionAndUpDirection(currentUpDirection, newPosition)
+      updateCursorTransformation(rotate90DegreesCounterclockwiseAlongZAxis)
+      updateCursorPosition(rotate90DegreesCounterclockwiseAlongZAxis)
       return 
     } 
     if (arraysEqual(currentUpDirection, [0, 0, -1])){
       let newPosition = rotate90DegreesClockwiseAlongZAxis(currentFacingDirection)
       updatePositionAndUpDirection(currentUpDirection, newPosition)
+      updateCursorTransformation(rotate90DegreesClockwiseAlongZAxis)
+      updateCursorPosition(rotate90DegreesClockwiseAlongZAxis)
       return 
     } 
 
     if (arraysEqual(currentUpDirection, [0, 1, 0])){
       let newPosition = rotate90DegreesCounterclockwiseAlongYAxis(currentFacingDirection)
       updatePositionAndUpDirection(currentUpDirection, newPosition)
+      updateCursorTransformation(rotate90DegreesCounterclockwiseAlongYAxis)
+      updateCursorPosition(rotate90DegreesCounterclockwiseAlongYAxis)
       return 
     }
 
     if (arraysEqual(currentUpDirection, [0, -1, 0])){
       let newPosition = rotate90DegreesClockwiseAlongYAxis(currentFacingDirection)
       updatePositionAndUpDirection(currentUpDirection, newPosition)
+      updateCursorTransformation(rotate90DegreesClockwiseAlongYAxis)
+      updateCursorPosition(rotate90DegreesClockwiseAlongYAxis)
       return 
     }
 
     if (arraysEqual(currentUpDirection, [-1, 0, 0])){
       let newPosition = rotate90DegreesCounterclockwiseAlongXAxis(currentFacingDirection)
       updatePositionAndUpDirection(currentUpDirection, newPosition)
+      updateCursorTransformation(rotate90DegreesCounterclockwiseAlongXAxis)
+      updateCursorPosition(rotate90DegreesCounterclockwiseAlongXAxis)
       return 
     }
 
     if (arraysEqual(currentUpDirection, [1, 0, 0])){
       let newPosition = rotate90DegreesClockwiseAlongXAxis(currentFacingDirection)
       updatePositionAndUpDirection(currentUpDirection, newPosition)
+      updateCursorTransformation(rotate90DegreesClockwiseAlongXAxis)
+      updateCursorPosition(rotate90DegreesClockwiseAlongXAxis)
       return 
     }
     
@@ -277,35 +359,47 @@ function onWindowResize(){
     if (arraysEqual(currentUpDirection, [0, 0, -1])){
       let newPosition = rotate90DegreesCounterclockwiseAlongZAxis(currentFacingDirection)
       updatePositionAndUpDirection(currentUpDirection, newPosition)
+      updateCursorTransformation(rotate90DegreesCounterclockwiseAlongZAxis)
+      updateCursorPosition(rotate90DegreesCounterclockwiseAlongZAxis)
       return 
     } 
     if (arraysEqual(currentUpDirection, [0, 0, 1])){
       let newPosition = rotate90DegreesClockwiseAlongZAxis(currentFacingDirection)
       updatePositionAndUpDirection(currentUpDirection, newPosition)
+      updateCursorTransformation(rotate90DegreesClockwiseAlongZAxis)
+      updateCursorPosition(rotate90DegreesClockwiseAlongZAxis)
       return 
     } 
 
     if (arraysEqual(currentUpDirection, [0, -1, 0])){
       let newPosition = rotate90DegreesCounterclockwiseAlongYAxis(currentFacingDirection)
       updatePositionAndUpDirection(currentUpDirection, newPosition)
+      updateCursorTransformation(rotate90DegreesCounterclockwiseAlongYAxis)
+      updateCursorPosition(rotate90DegreesCounterclockwiseAlongYAxis)
       return 
     }
 
     if (arraysEqual(currentUpDirection, [0, 1, 0])){
       let newPosition = rotate90DegreesClockwiseAlongYAxis(currentFacingDirection)
       updatePositionAndUpDirection(currentUpDirection, newPosition)
+      updateCursorTransformation(rotate90DegreesClockwiseAlongYAxis)
+      updateCursorPosition(rotate90DegreesClockwiseAlongYAxis)
       return 
     }
 
     if (arraysEqual(currentUpDirection, [1, 0, 0])){
       let newPosition = rotate90DegreesCounterclockwiseAlongXAxis(currentFacingDirection)
       updatePositionAndUpDirection(currentUpDirection, newPosition)
+      updateCursorTransformation(rotate90DegreesCounterclockwiseAlongXAxis)
+      updateCursorPosition(rotate90DegreesCounterclockwiseAlongXAxis)
       return 
     }
 
     if (arraysEqual(currentUpDirection, [-1, 0, 0])){
       let newPosition = rotate90DegreesClockwiseAlongXAxis(currentFacingDirection)
       updatePositionAndUpDirection(currentUpDirection, newPosition)
+      updateCursorTransformation(rotate90DegreesClockwiseAlongXAxis)
+      updateCursorPosition(rotate90DegreesClockwiseAlongXAxis)
       return 
     }
   })
@@ -316,6 +410,8 @@ function onWindowResize(){
         let newUpDirection = rotate90DegreesCounterclockwiseAlongXAxis(currentUpDirection)
         let newFacingDirection = rotate90DegreesCounterclockwiseAlongXAxis(currentFacingDirection)
         updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+        updateCursorTransformation(rotate90DegreesCounterclockwiseAlongXAxis)
+        updateCursorPosition(rotate90DegreesCounterclockwiseAlongXAxis)
         return 
       }
     const b = [{up: [0, 0, 1], facing: [1, 0, 0]}, {up: [1, 0, 0], facing: [0, 0, -1]}, {up: [0, 0, -1], facing: [-1, 0, 0]}, {up: [-1, 0, 0], facing: [0, 0, 1]}]
@@ -324,6 +420,8 @@ function onWindowResize(){
       let newUpDirection = rotate90DegreesCounterclockwiseAlongYAxis(currentUpDirection)
       let newFacingDirection = rotate90DegreesCounterclockwiseAlongYAxis(currentFacingDirection)
       updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      updateCursorTransformation(rotate90DegreesCounterclockwiseAlongYAxis)
+      updateCursorPosition(rotate90DegreesCounterclockwiseAlongYAxis)
       return 
     } 
     const c = [{up: [0, 0, 1], facing: [0, -1, 0]}, {up: [0, -1, 0], facing: [0, 0, -1]}, {up: [0, 0, -1], facing: [0, 1, 0]}, {up: [0, 1, 0], facing: [0, 0, 1]}]
@@ -332,6 +430,8 @@ function onWindowResize(){
       let newUpDirection = rotate90DegreesClockwiseAlongXAxis(currentUpDirection)
       let newFacingDirection = rotate90DegreesClockwiseAlongXAxis(currentFacingDirection)
       updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      updateCursorTransformation(rotate90DegreesClockwiseAlongXAxis)
+      updateCursorPosition(rotate90DegreesClockwiseAlongXAxis)
       return 
     } 
 
@@ -341,6 +441,8 @@ function onWindowResize(){
       let newUpDirection = rotate90DegreesClockwiseAlongYAxis(currentUpDirection)
       let newFacingDirection = rotate90DegreesClockwiseAlongYAxis(currentFacingDirection)
       updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      updateCursorTransformation(rotate90DegreesClockwiseAlongYAxis)
+      updateCursorPosition(rotate90DegreesClockwiseAlongYAxis)
       return 
     } 
 
@@ -350,6 +452,8 @@ function onWindowResize(){
       let newUpDirection = rotate90DegreesCounterclockwiseAlongZAxis(currentUpDirection)
       let newFacingDirection = rotate90DegreesCounterclockwiseAlongZAxis(currentFacingDirection)
       updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      updateCursorTransformation(rotate90DegreesCounterclockwiseAlongZAxis)
+      updateCursorPosition(rotate90DegreesCounterclockwiseAlongZAxis)
       return 
     } 
 
@@ -359,6 +463,8 @@ function onWindowResize(){
       let newUpDirection = rotate90DegreesClockwiseAlongZAxis(currentUpDirection)
       let newFacingDirection = rotate90DegreesClockwiseAlongZAxis(currentFacingDirection)
       updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      updateCursorTransformation(rotate90DegreesClockwiseAlongZAxis)
+      updateCursorPosition(rotate90DegreesClockwiseAlongZAxis)
       return 
     } 
   })
@@ -369,6 +475,8 @@ function onWindowResize(){
         let newUpDirection = rotate90DegreesClockwiseAlongXAxis(currentUpDirection)
         let newFacingDirection = rotate90DegreesClockwiseAlongXAxis(currentFacingDirection)
         updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+        updateCursorTransformation(rotate90DegreesClockwiseAlongXAxis)
+        updateCursorPosition(rotate90DegreesClockwiseAlongXAxis)
         return 
       }
     const b = [{up: [0, 0, 1], facing: [1, 0, 0]}, {up: [1, 0, 0], facing: [0, 0, -1]}, {up: [0, 0, -1], facing: [-1, 0, 0]}, {up: [-1, 0, 0], facing: [0, 0, 1]}]
@@ -377,6 +485,8 @@ function onWindowResize(){
       let newUpDirection = rotate90DegreesClockwiseAlongYAxis(currentUpDirection)
       let newFacingDirection = rotate90DegreesClockwiseAlongYAxis(currentFacingDirection)
       updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      updateCursorTransformation(rotate90DegreesClockwiseAlongYAxis)
+      updateCursorPosition(rotate90DegreesClockwiseAlongYAxis)
       return 
     } 
     const c = [{up: [0, 0, 1], facing: [0, -1, 0]}, {up: [0, -1, 0], facing: [0, 0, -1]}, {up: [0, 0, -1], facing: [0, 1, 0]}, {up: [0, 1, 0], facing: [0, 0, 1]}]
@@ -385,6 +495,8 @@ function onWindowResize(){
       let newUpDirection = rotate90DegreesCounterclockwiseAlongXAxis(currentUpDirection)
       let newFacingDirection = rotate90DegreesCounterclockwiseAlongXAxis(currentFacingDirection)
       updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      updateCursorTransformation(rotate90DegreesCounterclockwiseAlongXAxis)
+      updateCursorPosition(rotate90DegreesCounterclockwiseAlongXAxis)
       return 
     } 
 
@@ -394,6 +506,8 @@ function onWindowResize(){
       let newUpDirection = rotate90DegreesCounterclockwiseAlongYAxis(currentUpDirection)
       let newFacingDirection = rotate90DegreesCounterclockwiseAlongYAxis(currentFacingDirection)
       updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      updateCursorTransformation(rotate90DegreesCounterclockwiseAlongYAxis)
+      updateCursorPosition(rotate90DegreesCounterclockwiseAlongYAxis)
       return 
     } 
 
@@ -403,6 +517,8 @@ function onWindowResize(){
       let newUpDirection = rotate90DegreesClockwiseAlongZAxis(currentUpDirection)
       let newFacingDirection = rotate90DegreesClockwiseAlongZAxis(currentFacingDirection)
       updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      updateCursorTransformation(rotate90DegreesClockwiseAlongZAxis)
+      updateCursorPosition(rotate90DegreesClockwiseAlongZAxis)
       return 
     } 
 
@@ -412,11 +528,12 @@ function onWindowResize(){
       let newUpDirection = rotate90DegreesCounterclockwiseAlongZAxis(currentUpDirection)
       let newFacingDirection = rotate90DegreesCounterclockwiseAlongZAxis(currentFacingDirection)
       updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      updateCursorTransformation(rotate90DegreesCounterclockwiseAlongZAxis)
+      updateCursorPosition(rotate90DegreesCounterclockwiseAlongZAxis)
       return 
     } 
   })
 
-  let current_x_rotation = 0
   this.handleEvent("rotate_left", (payload) => {
     console.log(currentUpDirection, currentFacingDirection)
     const a = [{up: [0, 0, 1], facing: [0, 1, 0]}, {up: [1, 0, 0], facing: [0, 1, 0]}, {up: [0, 0, -1], facing: [0, 1, 0]}, {up: [-1, 0, 0], facing: [0, 1, 0]}]
@@ -424,6 +541,8 @@ function onWindowResize(){
       let newUpDirection = rotate90DegreesCounterclockwiseAlongYAxis(currentUpDirection)
       let newFacingDirection = rotate90DegreesCounterclockwiseAlongYAxis(currentFacingDirection)
       updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      updateCursorTransformation(rotate90DegreesCounterclockwiseAlongYAxis)
+      updateCursorPosition(rotate90DegreesCounterclockwiseAlongYAxis)
       return 
     }
     const b = [{up: [0, 0, 1], facing: [1, 0, 0]}, {up: [0, -1, 0], facing: [1, 0, 0]}, {up: [0, 0, -1], facing: [1, 0, 0]}, {up: [0, 1, 0], facing: [1, 0, 0]},]
@@ -431,6 +550,8 @@ function onWindowResize(){
       let newUpDirection = rotate90DegreesClockwiseAlongXAxis(currentUpDirection)
       let newFacingDirection = rotate90DegreesClockwiseAlongXAxis(currentFacingDirection)
       updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      updateCursorTransformation(rotate90DegreesClockwiseAlongXAxis)
+      updateCursorPosition(rotate90DegreesClockwiseAlongXAxis)
       return 
     } 
     const c = [{up: [0, 0, 1], facing: [0, -1, 0]}, {up: [1, 0, 0], facing: [0, -1, 0]}, {up: [0, 0, -1], facing: [0, -1, 0]}, {up: [-1, 0, 0], facing: [0, -1, 0]}]
@@ -438,6 +559,8 @@ function onWindowResize(){
       let newUpDirection = rotate90DegreesClockwiseAlongYAxis(currentUpDirection)
       let newFacingDirection = rotate90DegreesClockwiseAlongYAxis(currentFacingDirection)
       updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      updateCursorTransformation(rotate90DegreesClockwiseAlongYAxis)
+      updateCursorPosition(rotate90DegreesClockwiseAlongYAxis)
       return 
     } 
     const d = [{up: [0, 0, 1], facing: [-1, 0, 0]}, {up: [0, -1, 0], facing: [-1, 0, 0]}, {up: [0, 0, -1], facing: [-1, 0, 0]}, {up: [0, 1, 0], facing: [-1, 0, 0]}]
@@ -445,6 +568,8 @@ function onWindowResize(){
       let newUpDirection = rotate90DegreesCounterclockwiseAlongXAxis(currentUpDirection)
       let newFacingDirection = rotate90DegreesCounterclockwiseAlongXAxis(currentFacingDirection)
       updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      updateCursorTransformation(rotate90DegreesCounterclockwiseAlongXAxis)
+      updateCursorPosition(rotate90DegreesCounterclockwiseAlongXAxis)
       return 
     } 
     const e = [{up: [1, 0, 0], facing: [0, 0, -1]}, {up: [0, -1, 0], facing: [0, 0, -1]}, {up: [-1, 0, 0], facing: [0, 0, -1]}, {up: [0, 1, 0], facing: [0, 0, -1]}]
@@ -452,6 +577,8 @@ function onWindowResize(){
       let newUpDirection = rotate90DegreesClockwiseAlongZAxis(currentUpDirection)
       let newFacingDirection = rotate90DegreesClockwiseAlongZAxis(currentFacingDirection)
       updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      updateCursorTransformation(rotate90DegreesClockwiseAlongZAxis)
+      updateCursorPosition(rotate90DegreesClockwiseAlongZAxis)
       return 
     } 
     const f = [{up: [1, 0, 0], facing: [0, 0, 1]}, {up: [0, -1, 0], facing: [0, 0, 1]}, {up: [-1, 0, 0], facing: [0, 0, 1]}, {up: [0, 1, 0], facing: [0, 0, 1]}]
@@ -459,6 +586,8 @@ function onWindowResize(){
       let newUpDirection = rotate90DegreesCounterclockwiseAlongZAxis(currentUpDirection)
       let newFacingDirection = rotate90DegreesCounterclockwiseAlongZAxis(currentFacingDirection)
       updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      updateCursorTransformation(rotate90DegreesCounterclockwiseAlongZAxis)
+      updateCursorPosition(rotate90DegreesCounterclockwiseAlongZAxis)
       return 
     } 
   })
@@ -470,6 +599,8 @@ function onWindowResize(){
       let newUpDirection = rotate90DegreesClockwiseAlongYAxis(currentUpDirection)
       let newFacingDirection = rotate90DegreesClockwiseAlongYAxis(currentFacingDirection)
       updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      updateCursorTransformation(rotate90DegreesClockwiseAlongYAxis)
+      updateCursorPosition(rotate90DegreesClockwiseAlongYAxis)
       return 
     }
     const b = [{up: [0, 0, 1], facing: [1, 0, 0]}, {up: [0, -1, 0], facing: [1, 0, 0]}, {up: [0, 0, -1], facing: [1, 0, 0]}, {up: [0, 1, 0], facing: [1, 0, 0]},]
@@ -477,6 +608,8 @@ function onWindowResize(){
       let newUpDirection = rotate90DegreesCounterclockwiseAlongXAxis(currentUpDirection)
       let newFacingDirection = rotate90DegreesCounterclockwiseAlongXAxis(currentFacingDirection)
       updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      updateCursorTransformation(rotate90DegreesCounterclockwiseAlongXAxis)
+      updateCursorPosition(rotate90DegreesCounterclockwiseAlongXAxis)
       return 
     } 
     const c = [{up: [0, 0, 1], facing: [0, -1, 0]}, {up: [1, 0, 0], facing: [0, -1, 0]}, {up: [0, 0, -1], facing: [0, -1, 0]}, {up: [-1, 0, 0], facing: [0, -1, 0]}]
@@ -484,6 +617,8 @@ function onWindowResize(){
       let newUpDirection = rotate90DegreesCounterclockwiseAlongYAxis(currentUpDirection)
       let newFacingDirection = rotate90DegreesCounterclockwiseAlongYAxis(currentFacingDirection)
       updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      updateCursorTransformation(rotate90DegreesCounterclockwiseAlongYAxis)
+      updateCursorPosition(rotate90DegreesCounterclockwiseAlongYAxis)
       return 
     } 
     const d = [{up: [0, 0, 1], facing: [-1, 0, 0]}, {up: [0, -1, 0], facing: [-1, 0, 0]}, {up: [0, 0, -1], facing: [-1, 0, 0]}, {up: [0, 1, 0], facing: [-1, 0, 0]}]
@@ -491,6 +626,8 @@ function onWindowResize(){
       let newUpDirection = rotate90DegreesClockwiseAlongXAxis(currentUpDirection)
       let newFacingDirection = rotate90DegreesClockwiseAlongXAxis(currentFacingDirection)
       updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      updateCursorTransformation(rotate90DegreesClockwiseAlongXAxis)
+      updateCursorPosition(rotate90DegreesClockwiseAlongXAxis)
       return 
     } 
     const e = [{up: [1, 0, 0], facing: [0, 0, -1]}, {up: [0, -1, 0], facing: [0, 0, -1]}, {up: [-1, 0, 0], facing: [0, 0, -1]}, {up: [0, 1, 0], facing: [0, 0, -1]}]
@@ -498,6 +635,8 @@ function onWindowResize(){
       let newUpDirection = rotate90DegreesCounterclockwiseAlongZAxis(currentUpDirection)
       let newFacingDirection = rotate90DegreesCounterclockwiseAlongZAxis(currentFacingDirection)
       updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      updateCursorTransformation(rotate90DegreesCounterclockwiseAlongZAxis)
+      updateCursorPosition(rotate90DegreesCounterclockwiseAlongZAxis)
       return 
     } 
     const f = [{up: [1, 0, 0], facing: [0, 0, 1]}, {up: [0, -1, 0], facing: [0, 0, 1]}, {up: [-1, 0, 0], facing: [0, 0, 1]}, {up: [0, 1, 0], facing: [0, 0, 1]}]
@@ -505,15 +644,50 @@ function onWindowResize(){
       let newUpDirection = rotate90DegreesClockwiseAlongZAxis(currentUpDirection)
       let newFacingDirection = rotate90DegreesClockwiseAlongZAxis(currentFacingDirection)
       updatePositionAndUpDirection(newUpDirection, newFacingDirection)
+      updateCursorTransformation(rotate90DegreesClockwiseAlongZAxis)
+      updateCursorPosition(rotate90DegreesClockwiseAlongZAxis)
       return 
     } 
   })
 
 
+  //HANDLE KEY INPUT
+  function maybeMove(possibleNewPosition){
+    if (positionInBounds(possibleNewPosition)){
+      const [x, y, z] = possibleNewPosition
+      const cursor = scene.getObjectByName('cursor')
+      cursorPosition = possibleNewPosition
+      cursor.position.set(x, y, z)
+    }
+    
+  }
+  this.handleEvent("keydown", (payload) => {
+  if (payload.key == "q"){
+    const possibleNewPosition = applyTransformationToPosition(cursorTransformations.up, cursorPosition)
+    maybeMove(possibleNewPosition)
+  }
+  if (payload.key == "e"){
+    const possibleNewPosition = applyTransformationToPosition(cursorTransformations.down, cursorPosition)
+    maybeMove(possibleNewPosition)
+  }
+  if (payload.key == "w"){
+    const possibleNewPosition = applyTransformationToPosition(cursorTransformations.forward, cursorPosition)
+    maybeMove(possibleNewPosition)
+  }
+  if (payload.key == "s"){
+    const possibleNewPosition = applyTransformationToPosition(cursorTransformations.backward, cursorPosition)
+    maybeMove(possibleNewPosition)
+  }
+  if (payload.key == "a"){
+    const possibleNewPosition = applyTransformationToPosition(cursorTransformations.left, cursorPosition)
+    maybeMove(possibleNewPosition)
+  }
+  if (payload.key == "d"){
+    const possibleNewPosition = applyTransformationToPosition(cursorTransformations.right, cursorPosition)
+    maybeMove(possibleNewPosition)
+  }
 
-
-
-
+  })
 
 
   //---ANIMATE

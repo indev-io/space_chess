@@ -1158,59 +1158,33 @@ defmodule SpaceChess.GameEngine do
   defp decrement_steps(:infinity), do: :infinity
   defp decrement_steps(steps), do: steps - 1
 
-  # CLEAN THIS UP!
-  def rotate_xyz_coords_around_center_point_along_x_axis_by_90_deg_n_times(n, coords, point) do
-    {x, y, z} = translate_coords_to_origin(coords, point)
-    translate_coords_back({x, z, y * -1}, point)
+  def rotate_90_degrees_clockwise_along_x_axis(coordinates) do
+    {x, y, z} = coordinates
+    {x, -z, y}
   end
 
-  def rotate_xyz_coords_around_center_point_along_z_axis_by_90_deg_n_times(n, coords, point) do
-    {x, y, z} = translate_coords_to_origin(coords, point)
-    x = x * :math.cos(n * :math.pi() * 90) - y * :math.sin(n * :math.pi() * 90)
-    y = y * :math.sin(n * :math.pi() * 90) + y * :math.cos(n * :math.pi() * 90)
-    z = z
-    translate_coords_back({x, y, z}, point)
+  def rotate_90_degrees_counterclockwise_along_x_axis(coordinates) do
+    {x, y, z} = coordinates
+    {x, z, -y}
   end
 
-  def test_rotate_by_z(coords) do
-    {x, y, z} = coords
-    x = x * :math.cos(:math.pi() * 0.5) - y * :math.sin(:math.pi() * 0.5)
-    y = y * :math.sin(:math.pi() * 0.5) + y * :math.cos(:math.pi() * 0.5)
-    z = z
-    {x, y, z}
+  def rotate_90_degrees_clockwise_along_y_axis(coordinates) do
+    {x, y, z} = coordinates
+    {-z, y, x}
   end
 
-  def rotate_xyz_coords_around_y_axis_by_90_deg_n_times(n, {x, y, z}) do
-    # y axis rotation
-    x = x * :math.cos(n * :math.pi() * 90) + z * :math.sin(n * :math.pi() * 90)
-    y = y
-    z = z * :math.cos(n * :math.pi() * 90) - x * :math.sin(n * :math.pi() * 90)
-    {round(x), round(y), round(z)}
+  def rotate_90_degrees_counterclockwise_along_y_axis(coordinates) do
+    {x, y, z} = coordinates
+    {z, y, -x}
   end
 
-  def rotate_xyz_coords_around_z_axis_by_90_deg_n_times(n, {x, y, z}) do
-    # z axis rotation
-    x = x * :math.cos(n * :math.pi() * 90) - z * :math.sin(n * :math.pi() * 90)
-    y = y * :math.sin(n * :math.pi() * 90) + x * :math.cos(n * :math.pi() * 90)
-    z = z
-    {round(x), round(y), round(z)}
+  def rotate_90_degrees_clockwise_along_z_axis(coordinates) do
+    {x, y, z} = coordinates
+    {y, -x, z}
   end
 
-  defp translate_coords_to_origin(coords, point) do
-    {x, y, z} = coords
-    {a, b, c} = point
-    IO.puts("what is this shit?")
-    IO.inspect({x - a, y - b, z - c})
-    {x - a, y - b, z - c}
-  end
-
-  defp translate_coords_back(coords, point) do
-    IO.puts("point")
-    IO.inspect(point)
-    IO.puts("translated_coords")
-    IO.inspect(coords)
-    {x, y, z} = coords
-    {a, b, c} = point
-    {x + a, y + b, z + c}
+  def rotate_90_degrees_counterclockwise_along_z_axis(coordinates) do
+    {x, y, z} = coordinates
+    {-y, x, z}
   end
 end
