@@ -30,6 +30,7 @@ defmodule SpaceChessWeb.GameLive do
     <main phx-window-keydown="keydown" class="game-main">
       <div class="left">
         <h1>Game Status: Awaiting Players</h1>
+        <!--
         <div id="players">
           <%= for player <- @game_data.players do %>
             <div class="player">
@@ -48,7 +49,9 @@ defmodule SpaceChessWeb.GameLive do
               </div>
             </div>
           <% end %>
+
         </div>
+            -->
         <div phx-hook="ThreeHook" id="threejs-container" phx-update="ignore"></div>
         <button phx-click="toggle_grid">Toggle Grid</button>
         <button phx-click="update_board">Update Board</button>
@@ -59,6 +62,7 @@ defmodule SpaceChessWeb.GameLive do
         <button phx-click="rotate_left">rotate left ⤣</button>
         <button phx-click="rotate_right">⤤ rotate right</button>
       </div>
+      <!--
       <div class="right">
         <chatarea class="game-chat">
           <%= for chat <- @chat_data do %>
@@ -73,6 +77,7 @@ defmodule SpaceChessWeb.GameLive do
           <button>Send</button>
         </form>
       </div>
+      -->
     </main>
     """
   end

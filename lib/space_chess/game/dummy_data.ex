@@ -65,7 +65,7 @@ defmodule SpaceChess.Game.DummyData do
         %{id: 2, name: "devin"},
         %{id: 4, name: "bizarro_devin"}
       ],
-      board_dimensions: %{rows: 5, columns: 5, levels: 5},
+      board_dimensions: %{rows: 5, columns: 5, levels: 8},
       pieces: %{
         rook1: %{
           name: "rook1",
