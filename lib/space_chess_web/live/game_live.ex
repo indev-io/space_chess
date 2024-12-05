@@ -147,6 +147,17 @@ defmodule SpaceChessWeb.GameLive do
     {:noreply, push_event(socket, "keydown", %{key: key})}
   end
 
+  # handle data from javascript
+  def handle_event("makeMove", %{"move" => move}, socket) do
+    IO.inspect(move)
+    {:noreply, socket}
+  end
+
+  def handle_event("make_move", %{"move" => move}, socket) do
+    IO.inspect(move)
+    {:noreply, socket}
+  end
+
   def handle_info(info, socket) do
     socket = assign(socket, :chat_data, info.payload)
     {:noreply, socket}

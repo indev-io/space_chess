@@ -5,7 +5,7 @@ window.THREE = THREE
 const screenSize = 1.5
 const ThreeHook = {
     mounted(){
-
+    // const hook = this
     const scene = new THREE.Scene();
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth /screenSize , window.innerHeight/ screenSize);
@@ -21,6 +21,7 @@ const ThreeHook = {
     let dimensions;
     let cursorPosition;
     let rotationInfo;
+    let selectedPiece = "";
     let cursorTransformations = {
     "up" : [0, 0, 1],
     "down": [0, 0, -1],
@@ -29,6 +30,10 @@ const ThreeHook = {
     "backward": [0, -1, 0],
     "forward": [0, 1, 0] 
   }
+  //Stores moves and location information
+    let pieceInfo = [
+    {name: 'pawn11', position: [3, 3, 3], moves: [[3, 3, 4], [3, 4, 3]]}
+    ]
     const color = 0xFFFFFF;
     const intensity = 10;
     let light = new THREE.DirectionalLight(color, intensity);
@@ -132,6 +137,31 @@ function setupLights(){
     o.name = 'cursor'   
 }
 
+function addSelectedCube(location){
+  const [x, y, z] = location
+  const geometry = new THREE.BoxGeometry( 1, 1, 1);
+  const material = new THREE.MeshLambertMaterial( { color: 0x00ff00, transparent: true, opacity: 0.8} );
+  const o = new THREE.Mesh( geometry, material );
+  o.position.set(x,y,z)
+  o.name = "selected"   
+  scene.add( o );
+
+}
+
+function addHighlightedMoves(listOfMoves){
+  const highlightedGroup = new THREE.Group()
+  highlightedGroup.name = 'highlightedGroup'
+  for (let i = 0; i < listOfMoves.length; i++){
+    const [x, y, z] = listOfMoves[i]
+    const geometry = new THREE.BoxGeometry( 1, 1, 1);
+    const material = new THREE.MeshLambertMaterial( { color: 0x0000ff, transparent: true, opacity: 0.6} );
+    const o = new THREE.Mesh( geometry, material );
+    o.position.set(x,y,z)
+    highlightedGroup.add(o)
+  }
+  scene.add(highlightedGroup)
+}
+
   function render3Dgrid(rows, columns, levels){
     const gridGroup = new THREE.Group()
     gridGroup.name = 'gridGroup'
@@ -155,6 +185,112 @@ function setupLights(){
       scene.add(gridGroup)
     }
 
+
+  function clearHighlightedMoves(){
+    const highlightedGroup = scene.getObjectByName("highlightedGroup")
+    scene.remove(highlightedGroup)
+  }
+
+  function clearSelectedCube(){
+    const selectedCube = scene.getObjectByName("selected")
+    scene.remove(selectedCube)
+  }
+
+  function returnInfoIfPieceExistsOnSpace(currentPosition){
+    for (let i = 0; i < pieceInfo.length; i++){
+      if (arraysEqual(pieceInfo[i].position, currentPosition)){
+        return pieceInfo[i]
+      }
+    }
+  }
+
+  function returnInfoOfPieceByName(pieceName){
+    for (let i = 0; i < pieceInfo.length; i++){
+      if (pieceInfo[i].name === pieceName){
+        return pieceInfo[i]
+      }
+    }
+  }
+
+  function moveLegal(endingPosition, moves){
+    for (let i = 0; i < moves.length; i++){
+       if (arraysEqual(moves[i], endingPosition)){
+        return true
+       }
+    }
+    return false
+  }
+
+
+  function changeCursorCubeToSelectedMode(){
+    const cursorCube = scene.getObjectByName("cursor")
+    cursorCube.material.color.set(0x00ff00)
+    cursorCube.material.opacity = 0.9
+  }
+
+  function changeCursorCubeToDefaultMode(){
+    const cursorCube = scene.getObjectByName("cursor")
+    cursorCube.material.color.set(0x0000ff)
+    cursorCube.material.opacity = 0.6
+  }
+
+  function handleSelect(){
+    //if something is in hand
+    if (selectedPiece !== ""){
+      clearHighlightedMoves()
+      clearSelectedCube()
+      changeCursorCubeToDefaultMode()
+      makeMove(selectedPiece, cursorPosition)
+      selectedPiece = ""
+    } else {
+    //if hand empty
+    const pieceInfo = returnInfoIfPieceExistsOnSpace(cursorPosition)
+    if (pieceInfo){
+      selectedPiece = pieceInfo.name
+      changeCursorCubeToSelectedMode()
+      addSelectedCube(pieceInfo.position)
+      addHighlightedMoves(pieceInfo.moves)
+    }
+    }
+  }
+
+  function movePiece(piece, endingPosition){
+    console.log("is this thing on?")
+    const [x, y, z] = endingPosition
+    const piece = scene.getObjectByName(piece)
+    piece.position.set(x, y, z)
+  }
+
+  function makeMove(piece, endingPosition){
+    console.log(endingPosition, "WHQAT THE FUASIUADSIU")
+    const pieceInfo = returnInfoOfPieceByName(piece)
+    if (moveLegal(endingPosition, pieceInfo.moves)){
+      movePiece(piece, endingPosition)
+      hook.pushEvent("make_move", {move: [4, 5, 6]})
+    } 
+  }
+
+  function animateMove(piece, endingPosition){
+
+  }
+
+  //handle Select
+  //if piece selected is not empty, 
+  // --> makes a move
+  //--> deselects after making a move
+  //--> move is then checked after it is made
+  //if move is good, move piece
+  //send data to elixir
+
+
+  function handleDeSelect(){
+    clearHighlightedMoves()
+    clearSelectedCube()
+    changeCursorCubeToDefaultMode()
+    selectedPiece = ""
+  }
+
+
   //primitive
   function renderBoard(payload){
     // scene.clear()
@@ -166,7 +302,9 @@ function setupLights(){
     const pieces = payload.pieces
     for (const [piece, info] of Object.entries(pieces)) {
 
-      const geometry = eval(`new THREE.${info.model}`)
+      // const geometry = eval(`new THREE.${info.model}`)
+      //CHANGE THIS
+      const geometry = new THREE.TetrahedronGeometry(0.5)
       const material = new THREE.MeshStandardMaterial( { color: info.color, roughness: 0.477, metalness: 1} )
       const obj = new THREE.Mesh( geometry, material );
 
@@ -186,6 +324,11 @@ function setupLights(){
     addCursorCube(center[0], center[1], center[2])
 
   }
+
+ 
+   
+
+  
   
    //Event listeners from LiveView
    this.handleEvent("setup_game", (payload) => {
@@ -673,6 +816,7 @@ function setupLights(){
     
   }
   this.handleEvent("keydown", (payload) => {
+    console.log(payload.key, "FUCK YOU SHITFUCKSAOKASODKDASOKDASKO")
   if (payload.key == "q"){
     const possibleNewPosition = applyTransformationToPosition(cursorTransformations.up, cursorPosition)
     maybeMove(possibleNewPosition)
@@ -723,8 +867,14 @@ function setupLights(){
   if (payload.key == "["){
     resetCameraPosition()
   }
-  if (payload.key == "'"){
-    goToOrientation([0, 0, -1], [0, -1, 0])
+  
+  if (payload.key == "Enter"){
+    console.log("FUCK!")
+    // handleSelect()
+  }
+
+  if (payload.key == "Backspace"){
+    handleDeSelect()
   }
 
   })

@@ -952,6 +952,14 @@ defmodule SpaceChess.GameEngine do
     |> Enum.uniq()
   end
 
+  def test_get_all_moves_of_a_piece() do
+    board = create_board(5, 5, 5)
+    movement = @piece_behavior.pawn.movement
+    piece_name = :pawn1
+    position = {3, 3, 3}
+    get_all_moves_of_a_piece(position, movement, piece_name, board)
+  end
+
   # a path is the connection of multiple branches -> path: branch -- branch --- branch
   def move_along_branch_and_record_moves(
         true,
@@ -1186,5 +1194,53 @@ defmodule SpaceChess.GameEngine do
   def rotate_90_degrees_counterclockwise_along_z_axis(coordinates) do
     {x, y, z} = coordinates
     {-y, x, z}
+  end
+
+  # custom transformation -> :px, :nx, :py, :ny, :pz, :nz
+  # test {:ny, :px, :pz} should be the same as rotate_90_degrees_counterclockwise_along_z_axis
+  def transform_coordinates(coordinates, transformation) do
+    coordinates = Tuple.to_list(coordinates)
+    transformation = Tuple.to_list(transformation)
+    [x, y, z] = coordinates
+    px_pos = find_index(transformation, :px)
+    nx_pos = find_index(transformation, :nx)
+    py_pos = find_index(transformation, :py)
+    ny_pos = find_index(transformation, :ny)
+    pz_pos = find_index(transformation, :pz)
+    nz_pos = find_index(transformation, :nz)
+
+    {:empty, :empty, :empty}
+    |> apply_position(px_pos, x)
+    |> apply_position(nx_pos, -x)
+    |> apply_position(py_pos, y)
+    |> apply_position(ny_pos, -y)
+    |> apply_position(pz_pos, z)
+    |> apply_position(nz_pos, -z)
+  end
+
+  defp apply_position(coords, nil, _pos), do: coords
+
+  defp apply_position(coords, val, pos) do
+    put_elem(coords, val, pos)
+  end
+
+  defp find_index(transformation, pos) do
+    transformation
+    |> Enum.find_index(fn x -> x === pos end)
+  end
+
+  ## player 1 default is up_direction {0, 0, 1} facing_direction {0, 1, 0}
+  ## takes in orientation object: %{up: up, facing: facing }
+  def set_orientation(orientation) do
+    case orientation do
+      %{top: {0, 0, 1}, facing: {0, 1, 0}} -> {:px, :py, :pz}
+      %{top: {0, 0, 1}, facing: {1, 0, 0}} -> {:py, :nx, :pz}
+      %{top: {0, 0, 1}, facing: {0, -1, 0}} -> {:nx, :ny, :pz}
+      %{top: {0, 0, 1}, facing: {-1, 0, 0}} -> {:ny, :px, :pz}
+      %{top: {0, 0, -1}, facing: {0, 1, 0}} -> {:px, :py, :nz}
+      %{top: {0, 0, -1}, facing: {1, 0, 0}} -> {:py, :nx, :nz}
+      %{top: {0, 0, -1}, facing: {0, -1, 0}} -> {:nx, :ny, :nz}
+      %{top: {0, 0, -1}, facing: {-1, 0, 0}} -> {:ny, :px, :nz}
+    end
   end
 end
