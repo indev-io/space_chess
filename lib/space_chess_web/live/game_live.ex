@@ -153,11 +153,6 @@ defmodule SpaceChessWeb.GameLive do
     {:noreply, socket}
   end
 
-  def handle_event("make_move", %{"move" => move}, socket) do
-    IO.inspect(move)
-    {:noreply, socket}
-  end
-
   def handle_info(info, socket) do
     socket = assign(socket, :chat_data, info.payload)
     {:noreply, socket}

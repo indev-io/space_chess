@@ -338,7 +338,7 @@ defmodule SpaceChess.GameEngine do
         },
         %{
           transformation: {-1, 0, 0},
-          duration: 2,
+          steps: 2,
           opts: [dont_record: true, jump: true],
           branches: [
             %{
@@ -369,7 +369,7 @@ defmodule SpaceChess.GameEngine do
         },
         %{
           transformation: {1, 0, 0},
-          duration: 2,
+          steps: 2,
           opts: [dont_record: true, jump: true],
           branches: [
             %{
@@ -400,7 +400,7 @@ defmodule SpaceChess.GameEngine do
         },
         %{
           transformation: {0, -1, 0},
-          duration: 2,
+          steps: 2,
           opts: [dont_record: true, jump: true],
           branches: [
             %{
@@ -431,7 +431,7 @@ defmodule SpaceChess.GameEngine do
         },
         %{
           transformation: {0, 0, 1},
-          duration: 2,
+          steps: 2,
           opts: [dont_record: true, jump: true],
           branches: [
             %{
@@ -934,6 +934,21 @@ defmodule SpaceChess.GameEngine do
     result.position
   end
 
+  def get_all_moves_of_all_pieces(gameObj) do
+    board = gameObj.board
+
+    Enum.reduce(board, [], fn {key, value}, acc ->
+      if value === :empty do
+        acc
+      else
+        behavior = gameObj.piece_info[value][:behavior]
+        movement = gameObj.piece_behavior[behavior][:movement]
+        moves = get_all_moves_of_a_piece(key, movement, value, board)
+        [%{name: value, moves: moves} | acc]
+      end
+    end)
+  end
+
   # pieces on board will be :empty or have name which can be used to look up piece_status
 
   # vector is made of transformation (direction) and count (how many times to repeat that )
@@ -952,10 +967,18 @@ defmodule SpaceChess.GameEngine do
     |> Enum.uniq()
   end
 
+  # def test_get_all_moves_of_a_piece() do
+  #   board = create_board(5, 5, 5)
+  #   movement = @piece_behavior.rook.movement
+  #   piece_name = :rook1
+  #   position = {3, 3, 3}
+  #   get_all_moves_of_a_piece(position, movement, piece_name, board)
+  # end
+
   def test_get_all_moves_of_a_piece() do
     board = create_board(5, 5, 5)
-    movement = @piece_behavior.pawn.movement
-    piece_name = :pawn1
+    movement = @piece_behavior.knight.movement
+    piece_name = :knight1
     position = {3, 3, 3}
     get_all_moves_of_a_piece(position, movement, piece_name, board)
   end
@@ -1114,8 +1137,8 @@ defmodule SpaceChess.GameEngine do
 
     {continue_path, record_move, no_capture}
     |> check_dont_record(opts)
-    |> check_endpoint_only(opts)
-    |> check_resolution(opts)
+    |> check_endpoint_only(opts, movement_map)
+    |> check_resolution(opts, movement_map)
     |> check_capture_only(opts)
   end
 
@@ -1127,17 +1150,17 @@ defmodule SpaceChess.GameEngine do
     end
   end
 
-  defp check_endpoint_only({continue_path, record_move, no_capture}, opts) do
-    if Keyword.has_key?(opts, :endpoint_only) and opts.steps != 0 do
+  defp check_endpoint_only({continue_path, record_move, no_capture}, opts, movement_map) do
+    if Keyword.has_key?(opts, :endpoint_only) and movement_map.steps != 0 do
       {continue_path, false, no_capture}
     else
       {continue_path, record_move, no_capture}
     end
   end
 
-  defp check_resolution({continue_path, record_move, no_capture}, opts) do
+  defp check_resolution({continue_path, record_move, no_capture}, opts, movement_map) do
     if Keyword.has_key?(opts, :resolution) and
-         rem(opts.steps, opts[:resolution]) != 0 do
+         rem(movement_map.steps, opts[:resolution]) != 0 do
       {continue_path, false, no_capture}
     else
       {continue_path, record_move, no_capture}

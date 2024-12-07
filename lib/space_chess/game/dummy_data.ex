@@ -58,6 +58,927 @@ defmodule SpaceChess.Game.DummyData do
     ]
   }
 
+  @dummy_process_data [
+    %{
+      game_id: "abc123",
+      players: [
+        %{id: 2, name: "devin"},
+        %{id: 4, name: "bizarro_devin"}
+      ],
+      turn: :player1,
+      piece_behavior: %{
+        pawn: %{
+          abbreviation: "p",
+          opts: [],
+          movement: [
+            %{transformation: {0, 1, 0}, steps: 1, opts: [movement_only: true], branches: []},
+            %{transformation: {0, 0, 1}, steps: 1, opts: [movement_only: true], branches: []},
+            %{transformation: {-1, 1, 0}, steps: 1, opts: [capture_only: true], branches: []},
+            %{transformation: {1, 1, 0}, steps: 1, opts: [capture_only: true], branches: []},
+            %{transformation: {-1, 0, 1}, steps: 1, opts: [capture_only: true], branches: []},
+            %{transformation: {1, 0, 1}, steps: 1, opts: [capture_only: true], branches: []}
+          ]
+        },
+        rook: %{
+          abbreviation: "r",
+          opts: [],
+          movement: [
+            %{transformation: {0, 0, -1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {0, 1, 0}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {-1, 0, 0}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {1, 0, 0}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {0, -1, 0}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {0, 0, 1}, steps: :infinity, opts: [], branches: []}
+          ]
+        },
+        knight: %{
+          abbreviation: "n",
+          opts: [],
+          movement: [
+            %{
+              transformation: {0, 0, -1},
+              steps: 1,
+              opts: [dont_record: true, jump: true],
+              branches: [
+                %{
+                  transformation: {0, 1, 0},
+                  steps: 2,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {-1, 0, 0},
+                  steps: 2,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {1, 0, 0},
+                  steps: 2,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {0, -1, 0},
+                  steps: 2,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                }
+              ]
+            },
+            %{
+              transformation: {0, 1, 0},
+              steps: 1,
+              opts: [dont_record: true, jump: true],
+              branches: [
+                %{
+                  transformation: {0, 0, -1},
+                  steps: 2,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {-1, 0, 0},
+                  steps: 2,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {1, 0, 0},
+                  steps: 2,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {0, 0, 1},
+                  steps: 2,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                }
+              ]
+            },
+            %{
+              transformation: {-1, 0, 0},
+              steps: 1,
+              opts: [dont_record: true, jump: true],
+              branches: [
+                %{
+                  transformation: {0, 0, -1},
+                  steps: 2,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {0, 1, 0},
+                  steps: 2,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {0, -1, 0},
+                  steps: 2,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {0, 0, 1},
+                  steps: 2,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                }
+              ]
+            },
+            %{
+              transformation: {1, 0, 0},
+              steps: 1,
+              opts: [dont_record: true, jump: true],
+              branches: [
+                %{
+                  transformation: {0, 0, -1},
+                  steps: 2,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {0, 1, 0},
+                  steps: 2,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {0, -1, 0},
+                  steps: 2,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {0, 0, 1},
+                  steps: 2,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                }
+              ]
+            },
+            %{
+              transformation: {0, -1, 0},
+              steps: 1,
+              opts: [dont_record: true, jump: true],
+              branches: [
+                %{
+                  transformation: {0, 0, -1},
+                  steps: 2,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {-1, 0, 0},
+                  steps: 2,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {1, 0, 0},
+                  steps: 2,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {0, 0, 1},
+                  steps: 2,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                }
+              ]
+            },
+            %{
+              transformation: {0, 0, 1},
+              steps: 1,
+              opts: [dont_record: true, jump: true],
+              branches: [
+                %{
+                  transformation: {0, 1, 0},
+                  steps: 2,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {-1, 0, 0},
+                  steps: 2,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {1, 0, 0},
+                  steps: 2,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {0, -1, 0},
+                  steps: 2,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                }
+              ]
+            },
+            %{
+              transformation: {0, 0, -1},
+              steps: 2,
+              opts: [dont_record: true, jump: true],
+              branches: [
+                %{
+                  transformation: {0, 1, 0},
+                  steps: 1,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {-1, 0, 0},
+                  steps: 1,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {1, 0, 0},
+                  steps: 1,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {0, -1, 0},
+                  steps: 1,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                }
+              ]
+            },
+            %{
+              transformation: {0, 1, 0},
+              steps: 2,
+              opts: [dont_record: true, jump: true],
+              branches: [
+                %{
+                  transformation: {0, 0, -1},
+                  steps: 1,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {-1, 0, 0},
+                  steps: 1,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {1, 0, 0},
+                  steps: 1,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {0, 0, 1},
+                  steps: 1,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                }
+              ]
+            },
+            %{
+              transformation: {-1, 0, 0},
+              steps: 2,
+              opts: [dont_record: true, jump: true],
+              branches: [
+                %{
+                  transformation: {0, 0, -1},
+                  steps: 1,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {0, 1, 0},
+                  steps: 1,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {0, -1, 0},
+                  steps: 1,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {0, 0, 1},
+                  steps: 1,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                }
+              ]
+            },
+            %{
+              transformation: {1, 0, 0},
+              steps: 2,
+              opts: [dont_record: true, jump: true],
+              branches: [
+                %{
+                  transformation: {0, 0, -1},
+                  steps: 1,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {0, 1, 0},
+                  steps: 1,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {0, -1, 0},
+                  steps: 1,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {0, 0, 1},
+                  steps: 1,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                }
+              ]
+            },
+            %{
+              transformation: {0, -1, 0},
+              steps: 2,
+              opts: [dont_record: true, jump: true],
+              branches: [
+                %{
+                  transformation: {0, 0, -1},
+                  steps: 1,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {-1, 0, 0},
+                  steps: 1,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {1, 0, 0},
+                  steps: 1,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {0, 0, 1},
+                  steps: 1,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                }
+              ]
+            },
+            %{
+              transformation: {0, 0, 1},
+              steps: 2,
+              opts: [dont_record: true, jump: true],
+              branches: [
+                %{
+                  transformation: {0, 1, 0},
+                  steps: 1,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {-1, 0, 0},
+                  steps: 1,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {1, 0, 0},
+                  steps: 1,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                },
+                %{
+                  transformation: {0, -1, 0},
+                  steps: 1,
+                  opts: [jump: true, endpoint_only: true],
+                  branches: []
+                }
+              ]
+            }
+          ]
+        },
+        bishop: %{
+          abbreviation: "b",
+          opts: [],
+          movement: [
+            %{transformation: {0, 1, -1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {-1, 1, -1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {1, 0, -1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {0, -1, -1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {-1, -1, 0}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {1, 1, 0}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {-1, -1, 0}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {1, -1, 0}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {0, 1, 1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {-1, 0, 1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {1, 0, 1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {0, -1, 1}, steps: :infinity, opts: [], branches: []}
+          ]
+        },
+        unicorn: %{
+          abbreviation: "u",
+          opts: [],
+          movement: [
+            %{transformation: {-1, 1, -1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {1, 1, -1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {-1, -1, -1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {1, -1, -1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {-1, 1, 1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {1, 1, 1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {-1, -1, 1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {1, -1, 1}, steps: :infinity, opts: [], branches: []}
+          ]
+        },
+        queen: %{
+          abbreviation: "u",
+          opts: [],
+          movement: [
+            %{transformation: {0, 0, -1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {0, 1, 0}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {-1, 0, 0}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {1, 0, 0}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {0, -1, 0}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {0, 0, 1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {0, 1, -1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {-1, 1, -1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {1, 0, -1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {0, -1, -1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {-1, -1, 0}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {1, 1, 0}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {-1, -1, 0}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {1, -1, 0}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {0, 1, 1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {-1, 0, 1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {1, 0, 1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {0, -1, 1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {-1, 1, -1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {1, 1, -1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {-1, -1, -1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {1, -1, -1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {-1, 1, 1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {1, 1, 1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {-1, -1, 1}, steps: :infinity, opts: [], branches: []},
+            %{transformation: {1, -1, 1}, steps: :infinity, opts: [], branches: []}
+          ]
+        },
+        king: %{
+          abbreviation: "u",
+          opts: [],
+          movement: [
+            %{transformation: {0, 0, -1}, steps: 1, opts: [], branches: []},
+            %{transformation: {0, 1, 0}, steps: 1, opts: [], branches: []},
+            %{transformation: {-1, 0, 0}, steps: 1, opts: [], branches: []},
+            %{transformation: {1, 0, 0}, steps: 1, opts: [], branches: []},
+            %{transformation: {0, -1, 0}, steps: 1, opts: [], branches: []},
+            %{transformation: {0, 0, 1}, steps: 1, opts: [], branches: []},
+            %{transformation: {0, 1, -1}, steps: 1, opts: [], branches: []},
+            %{transformation: {-1, 1, -1}, steps: 1, opts: [], branches: []},
+            %{transformation: {1, 0, -1}, steps: 1, opts: [], branches: []},
+            %{transformation: {0, -1, -1}, steps: 1, opts: [], branches: []},
+            %{transformation: {-1, -1, 0}, steps: 1, opts: [], branches: []},
+            %{transformation: {1, 1, 0}, steps: 1, opts: [], branches: []},
+            %{transformation: {-1, -1, 0}, steps: 1, opts: [], branches: []},
+            %{transformation: {1, -1, 0}, steps: 1, opts: [], branches: []},
+            %{transformation: {0, 1, 1}, steps: 1, opts: [], branches: []},
+            %{transformation: {-1, 0, 1}, steps: 1, opts: [], branches: []},
+            %{transformation: {1, 0, 1}, steps: 1, opts: [], branches: []},
+            %{transformation: {0, -1, 1}, steps: 1, opts: [], branches: []},
+            %{transformation: {-1, 1, -1}, steps: 1, opts: [], branches: []},
+            %{transformation: {1, 1, -1}, steps: 1, opts: [], branches: []},
+            %{transformation: {-1, -1, -1}, steps: 1, opts: [], branches: []},
+            %{transformation: {1, -1, -1}, steps: 1, opts: [], branches: []},
+            %{transformation: {-1, 1, 1}, steps: 1, opts: [], branches: []},
+            %{transformation: {1, 1, 1}, steps: 1, opts: [], branches: []},
+            %{transformation: {-1, -1, 1}, steps: 1, opts: [], branches: []},
+            %{transformation: {1, -1, 1}, steps: 1, opts: [], branches: []}
+          ]
+        }
+      },
+      piece_info: %{
+        pawn1: %{
+          owner: :player1,
+          behavior: :pawn,
+          color: 0xD4AF37,
+          model: "BoxGeometry( 0.5, 0.5, 0.5 )",
+          orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
+        },
+        pawn2: %{
+          owner: :player1,
+          behavior: :pawn,
+          color: 0xD4AF37,
+          model: "BoxGeometry( 0.5, 0.5, 0.5 )",
+          orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
+        },
+        pawn3: %{
+          owner: :player1,
+          behavior: :pawn,
+          color: 0xD4AF37,
+          model: "BoxGeometry( 0.5, 0.5, 0.5 )",
+          orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
+        },
+        pawn4: %{
+          owner: :player1,
+          behavior: :pawn,
+          color: 0xD4AF37,
+          model: "BoxGeometry( 0.5, 0.5, 0.5 )",
+          orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
+        },
+        pawn5: %{
+          owner: :player1,
+          behavior: :pawn,
+          color: 0xD4AF37,
+          model: "BoxGeometry( 0.5, 0.5, 0.5 )",
+          orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
+        },
+        pawn6: %{
+          owner: :player1,
+          behavior: :pawn,
+          color: 0xD4AF37,
+          model: "BoxGeometry( 0.5, 0.5, 0.5 )",
+          orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
+        },
+        pawn7: %{
+          owner: :player1,
+          behavior: :pawn,
+          color: 0xD4AF37,
+          model: "BoxGeometry( 0.5, 0.5, 0.5 )",
+          orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
+        },
+        pawn8: %{
+          owner: :player1,
+          behavior: :pawn,
+          color: 0xD4AF37,
+          model: "BoxGeometry( 0.5, 0.5, 0.5 )",
+          orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
+        },
+        pawn9: %{
+          owner: :player1,
+          behavior: :pawn,
+          color: 0xD4AF37,
+          model: "BoxGeometry( 0.5, 0.5, 0.5 )",
+          orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
+        },
+        pawn10: %{
+          owner: :player1,
+          behavior: :pawn,
+          color: 0xD4AF37,
+          model: "BoxGeometry( 0.5, 0.5, 0.5 )",
+          orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
+        },
+        rook1: %{
+          owner: :player1,
+          behavior: :rook,
+          color: 0xD4AF37,
+          model: "BoxGeometry( 0.5, 0.5, 0.5 )",
+          orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
+        },
+        rook2: %{
+          owner: :player1,
+          behavior: :rook,
+          color: 0xD4AF37,
+          model: "BoxGeometry( 0.5, 0.5, 0.5 )",
+          orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
+        },
+        knight1: %{
+          owner: :player1,
+          behavior: :knight,
+          color: 0xD4AF37,
+          model: "IcosahedronGeometry( 0.45 )",
+          orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
+        },
+        knight2: %{
+          owner: :player1,
+          behavior: :knight,
+          color: 0xD4AF37,
+          model: "IcosahedronGeometry( 0.45 )",
+          orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
+        },
+        bishop1: %{
+          owner: :player1,
+          behavior: :bishop,
+          color: 0xD4AF37,
+          model: "OctahedronGeometry( 0.5 )",
+          orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
+        },
+        bishop2: %{
+          owner: :player1,
+          behavior: :bishop,
+          color: 0xD4AF37,
+          model: "OctahedronGeometry( 0.5 )",
+          orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
+        },
+        unicorn1: %{
+          owner: :player1,
+          behavior: :unicorn,
+          color: 0xD4AF37,
+          model: "ConeGeometry(0.3, 0.8, 15 )",
+          orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
+        },
+        unicorn2: %{
+          owner: :player1,
+          behavior: :unicorn,
+          color: 0xD4AF37,
+          model: "ConeGeometry(0.3, 0.8, 15 )",
+          orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
+        },
+        king1: %{
+          owner: :player1,
+          behavior: :king,
+          color: 0xD4AF37,
+          model: "TorusGeometry(0.3, 0.15, 15, 15 )",
+          orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
+        },
+        queen1: %{
+          owner: :player1,
+          behavior: :king,
+          color: 0xD4AF37,
+          model: "SphereGeometry( 0.4, 15, 15)",
+          orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
+        },
+        pawn11: %{
+          owner: :player2,
+          behavior: :pawn,
+          color: 0xC7D1DA,
+          model: "TetrahedronGeometry( 0.5 )",
+          orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
+        },
+        pawn12: %{
+          owner: :player2,
+          behavior: :pawn,
+          color: 0xC7D1DA,
+          model: "TetrahedronGeometry( 0.5 )",
+          orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
+        },
+        pawn13: %{
+          owner: :player2,
+          behavior: :pawn,
+          color: 0xC7D1DA,
+          model: "TetrahedronGeometry( 0.5 )",
+          orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
+        },
+        pawn14: %{
+          owner: :player2,
+          behavior: :pawn,
+          color: 0xC7D1DA,
+          model: "TetrahedronGeometry( 0.5 )",
+          orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
+        },
+        pawn15: %{
+          owner: :player2,
+          behavior: :pawn,
+          color: 0xC7D1DA,
+          model: "TetrahedronGeometry( 0.5 )",
+          orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
+        },
+        pawn16: %{
+          owner: :player2,
+          behavior: :pawn,
+          color: 0xC7D1DA,
+          model: "TetrahedronGeometry( 0.5 )",
+          orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
+        },
+        pawn17: %{
+          owner: :player2,
+          behavior: :pawn,
+          color: 0xC7D1DA,
+          model: "TetrahedronGeometry( 0.5 )",
+          orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
+        },
+        pawn18: %{
+          owner: :player2,
+          behavior: :pawn,
+          color: 0xC7D1DA,
+          model: "TetrahedronGeometry( 0.5 )",
+          orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
+        },
+        pawn19: %{
+          owner: :player2,
+          behavior: :pawn,
+          color: 0xC7D1DA,
+          model: "TetrahedronGeometry( 0.5 )",
+          orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
+        },
+        pawn20: %{
+          owner: :player2,
+          behavior: :pawn,
+          color: 0xC7D1DA,
+          model: "TetrahedronGeometry( 0.5 )",
+          orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
+        },
+        rook3: %{
+          owner: :player2,
+          behavior: :rook,
+          color: 0xC7D1DA,
+          model: "BoxGeometry( 0.5, 0.5, 0.5 )",
+          orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
+        },
+        rook4: %{
+          owner: :player2,
+          behavior: :rook,
+          color: 0xC7D1DA,
+          model: "BoxGeometry( 0.5, 0.5, 0.5 )",
+          orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
+        },
+        knight3: %{
+          owner: :player2,
+          behavior: :knight,
+          color: 0xC7D1DA,
+          model: "IcosahedronGeometry( 0.45 )",
+          orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
+        },
+        knight4: %{
+          owner: :player2,
+          behavior: :knight,
+          color: 0xC7D1DA,
+          model: "IcosahedronGeometry( 0.45 )",
+          orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
+        },
+        bishop3: %{
+          owner: :player2,
+          behavior: :bishop,
+          color: 0xC7D1DA,
+          model: "OctahedronGeometry( 0.5 )",
+          orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
+        },
+        bishop4: %{
+          owner: :player2,
+          behavior: :bishop,
+          color: 0xC7D1DA,
+          model: "OctahedronGeometry( 0.5 )",
+          orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
+        },
+        unicorn3: %{
+          owner: :player2,
+          behavior: :unicorn,
+          color: 0xC7D1DA,
+          model: "ConeGeometry(0.3, 0.8, 15 )",
+          orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
+        },
+        unicorn4: %{
+          owner: :player2,
+          behavior: :unicorn,
+          color: 0xC7D1DA,
+          model: "ConeGeometry(0.3, 0.8, 15 )",
+          orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
+        },
+        king2: %{
+          owner: :player2,
+          behavior: :king,
+          color: 0xC7D1DA,
+          model: "TorusGeometry(0.3, 0.15, 15, 15 )",
+          orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
+        },
+        queen2: %{
+          owner: :player2,
+          behavior: :queen,
+          color: 0xC7D1DA,
+          model: "TorusGeometry(0.3, 0.15, 15, 15 )",
+          orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
+        }
+      },
+      board: %{
+        {2, 4, 4} => :pawn17,
+        {5, 5, 3} => :empty,
+        {2, 2, 4} => :empty,
+        {3, 5, 2} => :empty,
+        {4, 1, 4} => :empty,
+        {3, 2, 3} => :empty,
+        {3, 3, 2} => :empty,
+        {1, 5, 4} => :unicorn3,
+        {4, 2, 2} => :pawn9,
+        {2, 5, 5} => :knight3,
+        {3, 4, 5} => :pawn13,
+        {4, 2, 3} => :empty,
+        {3, 5, 5} => :king2,
+        {4, 5, 1} => :empty,
+        {2, 1, 3} => :empty,
+        {4, 3, 4} => :empty,
+        {2, 3, 1} => :empty,
+        {1, 2, 2} => :pawn6,
+        {4, 1, 2} => :bishop2,
+        {1, 1, 4} => :empty,
+        {4, 4, 3} => :empty,
+        {2, 4, 1} => :empty,
+        {2, 4, 5} => :pawn12,
+        {3, 4, 3} => :empty,
+        {3, 4, 2} => :empty,
+        {3, 4, 1} => :empty,
+        {4, 4, 1} => :empty,
+        {4, 1, 3} => :empty,
+        {1, 2, 4} => :empty,
+        {1, 5, 2} => :empty,
+        {3, 3, 5} => :empty,
+        {2, 3, 3} => :empty,
+        {2, 2, 1} => :pawn2,
+        {1, 2, 1} => :pawn1,
+        {5, 5, 5} => :rook4,
+        {5, 5, 1} => :empty,
+        {5, 3, 5} => :empty,
+        {3, 2, 5} => :empty,
+        {2, 4, 3} => :empty,
+        {3, 5, 4} => :queen2,
+        {5, 5, 4} => :bishop4,
+        {3, 5, 3} => :empty,
+        {2, 5, 2} => :empty,
+        {1, 4, 4} => :pawn16,
+        {1, 5, 1} => :empty,
+        {1, 3, 1} => :empty,
+        {2, 1, 4} => :empty,
+        {4, 3, 3} => :empty,
+        {5, 1, 4} => :empty,
+        {5, 4, 1} => :empty,
+        {2, 2, 5} => :empty,
+        {5, 1, 2} => :unicorn2,
+        {3, 1, 5} => :empty,
+        {2, 3, 4} => :empty,
+        {4, 2, 5} => :empty,
+        {4, 1, 5} => :empty,
+        {3, 3, 3} => :empty,
+        {5, 2, 1} => :pawn5,
+        {1, 3, 3} => :empty,
+        {5, 2, 4} => :empty,
+        {5, 4, 3} => :empty,
+        {5, 4, 5} => :pawn15,
+        {3, 2, 1} => :pawn3,
+        {3, 1, 2} => :queen1,
+        {1, 1, 2} => :bishop1,
+        {5, 3, 4} => :empty,
+        {4, 3, 1} => :empty,
+        {5, 2, 2} => :pawn10,
+        {2, 2, 2} => :pawn7,
+        {2, 1, 2} => :unicorn1,
+        {1, 4, 1} => :empty,
+        {5, 3, 3} => :empty,
+        {3, 1, 4} => :empty,
+        {2, 2, 3} => :empty,
+        {4, 2, 4} => :empty,
+        {2, 5, 4} => :bishop3,
+        {3, 5, 1} => :empty,
+        {5, 3, 2} => :empty,
+        {5, 1, 1} => :rook2,
+        {4, 2, 1} => :pawn4,
+        {1, 1, 3} => :empty,
+        {5, 3, 1} => :empty,
+        {1, 3, 2} => :empty,
+        {2, 1, 5} => :empty,
+        {1, 4, 2} => :empty,
+        {5, 1, 3} => :empty,
+        {4, 4, 4} => :pawn19,
+        {1, 3, 4} => :empty,
+        {4, 4, 5} => :pawn14,
+        {4, 5, 4} => :unicorn4,
+        {5, 4, 4} => :pawn20,
+        {3, 4, 4} => :pawn18,
+        {1, 1, 1} => :rook1,
+        {3, 1, 1} => :king1,
+        {1, 3, 5} => :empty,
+        {5, 4, 2} => :empty,
+        {2, 5, 1} => :empty,
+        {4, 1, 1} => :knight2,
+        {3, 2, 2} => :pawn8,
+        {1, 2, 5} => :empty,
+        {3, 3, 4} => :empty,
+        {5, 1, 5} => :empty,
+        {2, 3, 2} => :empty,
+        {1, 5, 3} => :empty,
+        {4, 5, 2} => :empty,
+        {4, 3, 2} => :empty,
+        {1, 5, 5} => :rook3,
+        {1, 4, 5} => :pawn11,
+        {3, 3, 1} => :empty,
+        {5, 2, 5} => :empty,
+        {1, 4, 3} => :empty,
+        {4, 5, 5} => :knight4,
+        {2, 5, 3} => :empty,
+        {2, 1, 1} => :knight1,
+        {3, 1, 3} => :empty,
+        {5, 5, 2} => :empty,
+        {5, 2, 3} => :empty,
+        {3, 2, 4} => :empty,
+        {4, 5, 3} => :empty,
+        {4, 3, 5} => :empty,
+        {2, 3, 5} => :empty,
+        {4, 4, 2} => :empty,
+        {1, 2, 3} => :empty,
+        {1, 1, 5} => :empty,
+        {2, 4, 2} => :empty
+      },
+      moves: %{}
+    }
+  ]
+
   @dummy_game_data [
     %{
       game_id: "abc123",
@@ -65,290 +986,397 @@ defmodule SpaceChess.Game.DummyData do
         %{id: 2, name: "devin"},
         %{id: 4, name: "bizarro_devin"}
       ],
-      moves: %{
-        pawn1: [[3, 3, 4], [3, 4, 3]]
+      turn: "player1",
+      default_camera_orientation: %{
+        player1: %{up: [0, 0, 1], facing: [0, 1, 0]},
+        player2: %{up: [0, 0, -1], facing: [0, -1, 0]}
       },
       board_dimensions: %{rows: 5, columns: 5, levels: 5},
       pieces: %{
         # rook1: %{
         #   name: "rook1",
-        #   coords: [1, 1, 1],
+        #   position: [1, 1, 1],
+        #   moves: [],
         #   owner: "player1",
         #   color: 0xD4AF37,
-        #   model: "BoxGeometry( 0.5, 0.5, 0.5 )"
+        #   model: "BoxGeometry( 0.5, 0.5, 0.5 )",
+        #   orientation: %{up: [0, 0, 1], facing: [0, 1, 0]}
         # },
         # knight1: %{
         #   name: "knight1",
-        #   coords: [2, 1, 1],
+        #   position: [2, 1, 1],
+        #   moves: [],
         #   owner: "player1",
         #   color: 0xD4AF37,
-        #   model: "IcosahedronGeometry( 0.45 )"
+        #   model: "IcosahedronGeometry( 0.45 )",
+        #   orientation: %{up: [0, 0, 1], facing: [0, 1, 0]}
         # },
         # king1: %{
         #   name: "king1",
-        #   coords: [3, 1, 1],
+        #   position: [3, 1, 1],
+        #   moves: [],
         #   owner: "player1",
         #   color: 0xD4AF37,
-        #   model: "TorusGeometry(0.3, 0.15, 15, 15 )"
+        #   model: "TorusGeometry(0.3, 0.15, 15, 15 )",
+        #   orientation: %{up: [0, 0, 1], facing: [0, 1, 0]}
         # },
         # knight2: %{
         #   name: "knight2",
-        #   coords: [4, 1, 1],
+        #   position: [4, 1, 1],
+        #   moves: [],
         #   owner: "player1",
         #   color: 0xD4AF37,
-        #   model: "IcosahedronGeometry( 0.45 )"
+        #   model: "IcosahedronGeometry( 0.45 )",
+        #   orientation: %{up: [0, 0, 1], facing: [0, 1, 0]}
         # },
         # rook2: %{
         #   name: "rook2",
-        #   coords: [5, 1, 1],
+        #   position: [5, 1, 1],
+        #   moves: [],
         #   owner: "player1",
         #   color: 0xD4AF37,
-        #   model: "BoxGeometry( 0.5, 0.5, 0.5 )"
+        #   model: "BoxGeometry( 0.5, 0.5, 0.5 )",
+        #   orientation: %{up: [0, 0, 1], facing: [0, 1, 0]}
         # },
         pawn1: %{
-          name: "pawn1",
-          coords: [3, 3, 3],
+          name: "knight5",
+          position: [3, 3, 3],
+          moves: [
+            [3, 2, 5],
+            [4, 3, 5],
+            [2, 3, 5],
+            [3, 4, 5],
+            [3, 1, 4],
+            [4, 1, 3],
+            [2, 1, 3],
+            [3, 1, 2],
+            [5, 3, 4],
+            [5, 2, 3],
+            [5, 4, 3],
+            [5, 3, 2],
+            [1, 3, 4],
+            [1, 2, 3],
+            [1, 4, 3],
+            [1, 3, 2],
+            [3, 5, 4],
+            [4, 5, 3],
+            [2, 5, 3],
+            [3, 5, 2],
+            [3, 2, 1],
+            [4, 3, 1],
+            [2, 3, 1],
+            [3, 4, 1]
+          ],
           owner: "player1",
           color: 0xD4AF37,
-          model: "TetrahedronGeometry( 0.5 )"
+          model: "IcosahedronGeometry( 0.45 )",
+          orientation: %{up: [0, 0, 1], facing: [0, 1, 0]}
         }
         # pawn2: %{
         #   name: "pawn2",
-        #   coords: [2, 2, 1],
+        #   position: [2, 2, 1],
+        #   moves: [],
         #   owner: "player1",
         #   color: 0xD4AF37,
-        #   model: "TetrahedronGeometry( 0.5 )"
+        #   model: "TetrahedronGeometry( 0.5 )",
+        #   orientation: %{up: [0, 0, 1], facing: [0, 1, 0]}
         # },
         # pawn3: %{
         #   name: "pawn3",
-        #   coords: [3, 2, 1],
+        #   position: [3, 2, 1],
+        #   moves: [],
         #   owner: "player1",
         #   color: 0xD4AF37,
-        #   model: "TetrahedronGeometry( 0.5 )"
+        #   model: "TetrahedronGeometry( 0.5 )",
+        #   orientation: %{up: [0, 0, 1], facing: [0, 1, 0]}
         # },
         # pawn4: %{
         #   name: "pawn4",
-        #   coords: [4, 2, 1],
+        #   position: [4, 2, 1],
+        #   moves: [],
         #   owner: "player1",
         #   color: 0xD4AF37,
-        #   model: "TetrahedronGeometry( 0.5 )"
+        #   model: "TetrahedronGeometry( 0.5 )",
+        #   orientation: %{up: [0, 0, 1], facing: [0, 1, 0]}
         # },
         # pawn5: %{
         #   name: "pawn5",
-        #   coords: [5, 2, 1],
+        #   position: [5, 2, 1],
+        #   moves: [],
         #   owner: "player1",
         #   color: 0xD4AF37,
-        #   model: "TetrahedronGeometry( 0.5 )"
+        #   model: "TetrahedronGeometry( 0.5 )",
+        #   orientation: %{up: [0, 0, 1], facing: [0, 1, 0]}
         # },
         # bishop1: %{
         #   name: "bishop1",
-        #   coords: [1, 1, 2],
+        #   position: [1, 1, 2],
+        #   moves: [],
         #   owner: "player1",
         #   color: 0xD4AF37,
-        #   model: "OctahedronGeometry( 0.5 )"
+        #   model: "OctahedronGeometry( 0.5 )",
+        #   orientation: %{up: [0, 0, 1], facing: [0, 1, 0]}
         # },
         # unicorn1: %{
         #   name: "unicorn1",
-        #   coords: [2, 1, 2],
+        #   position: [2, 1, 2],
+        #   moves: [],
         #   owner: "player1",
         #   color: 0xD4AF37,
-        #   model: "ConeGeometry(0.3, 0.8, 15 )"
+        #   model: "ConeGeometry(0.3, 0.8, 15 )",
+        #   orientation: %{up: [0, 0, 1], facing: [0, 1, 0]}
         # },
         # queen1: %{
         #   name: "queen1",
-        #   coords: [3, 1, 2],
+        #   position: [3, 1, 2],
+        #   moves: [],
         #   owner: "player1",
         #   color: 0xD4AF37,
-        #   model: "SphereGeometry( 0.4, 15, 15)"
+        #   model: "SphereGeometry( 0.4, 15, 15)",
+        #   orientation: %{up: [0, 0, 1], facing: [0, 1, 0]}
         # },
         # bishop2: %{
         #   name: "bishop2",
-        #   coords: [4, 1, 2],
+        #   position: [4, 1, 2],
+        #   moves: [],
         #   owner: "player1",
         #   color: 0xD4AF37,
-        #   model: "OctahedronGeometry( 0.5 )"
+        #   model: "OctahedronGeometry( 0.5 )",
+        #   orientation: %{up: [0, 0, 1], facing: [0, 1, 0]}
         # },
         # unicorn2: %{
         #   name: "unicorn2",
-        #   coords: [5, 1, 2],
+        #   position: [5, 1, 2],
+        #   moves: [],
         #   owner: "player1",
         #   color: 0xD4AF37,
-        #   model: "ConeGeometry(0.3, 0.8, 15 )"
+        #   model: "ConeGeometry(0.3, 0.8, 15 )",
+        #   orientation: %{up: [0, 0, 1], facing: [0, 1, 0]}
         # },
         # pawn6: %{
         #   name: "pawn6",
-        #   coords: [1, 2, 2],
+        #   position: [1, 2, 2],
+        #   moves: [],
         #   owner: "player1",
         #   color: 0xD4AF37,
-        #   model: "TetrahedronGeometry( 0.5 )"
+        #   model: "TetrahedronGeometry( 0.5 )",
+        #   orientation: %{up: [0, 0, 1], facing: [0, 1, 0]}
         # },
         # pawn7: %{
         #   name: "pawn7",
-        #   coords: [2, 2, 2],
+        #   position: [2, 2, 2],
+        #   moves: [],
         #   owner: "player1",
         #   color: 0xD4AF37,
-        #   model: "TetrahedronGeometry( 0.5 )"
+        #   model: "TetrahedronGeometry( 0.5 )",
+        #   orientation: %{up: [0, 0, 1], facing: [0, 1, 0]}
         # },
         # pawn8: %{
         #   name: "pawn8",
-        #   coords: [3, 2, 2],
+        #   position: [3, 2, 2],
+        #   moves: [],
         #   owner: "player1",
         #   color: 0xD4AF37,
-        #   model: "TetrahedronGeometry( 0.5 )"
+        #   model: "TetrahedronGeometry( 0.5 )",
+        #   orientation: %{up: [0, 0, 1], facing: [0, 1, 0]}
         # },
         # pawn9: %{
         #   name: "pawn9",
-        #   coords: [4, 2, 2],
+        #   position: [4, 2, 2],
+        #   moves: [],
         #   owner: "player1",
         #   color: 0xD4AF37,
-        #   model: "TetrahedronGeometry( 0.5 )"
+        #   model: "TetrahedronGeometry( 0.5 )",
+        #   orientation: %{up: [0, 0, 1], facing: [0, 1, 0]}
         # },
         # pawn10: %{
         #   name: "pawn10",
-        #   coords: [5, 2, 2],
+        #   position: [5, 2, 2],
+        #   moves: [],
         #   owner: "player1",
         #   color: 0xD4AF37,
-        #   model: "TetrahedronGeometry( 0.5 )"
+        #   model: "TetrahedronGeometry( 0.5 )",
+        #   orientation: %{up: [0, 0, 1], facing: [0, 1, 0]}
         # },
         # rook3: %{
         #   name: "rook3",
-        #   coords: [1, 5, 5],
+        #   position: [1, 5, 5],
+        #   moves: [],
         #   owner: "player2",
         #   color: 0xC7D1DA,
-        #   model: "BoxGeometry( 0.5, 0.5, 0.5 )"
+        #   model: "BoxGeometry( 0.5, 0.5, 0.5 )",
+        #   orientation: %{up: [0, 0, -1], facing: [0, -1, 0]}
         # },
         # knight3: %{
         #   name: "knight3",
-        #   coords: [2, 5, 5],
+        #   position: [2, 5, 5],
+        #   moves: [],
         #   owner: "player2",
         #   color: 0xC7D1DA,
-        #   model: "IcosahedronGeometry( 0.45 )"
+        #   model: "IcosahedronGeometry( 0.45 )",
+        #   orientation: %{up: [0, 0, -1], facing: [0, -1, 0]}
         # },
         # king2: %{
         #   name: "king2",
-        #   coords: [3, 5, 5],
+        #   position: [3, 5, 5],
+        #   moves: [],
         #   owner: "player2",
         #   color: 0xC7D1DA,
-        #   model: "TorusGeometry(0.3, 0.15, 15, 15 )"
+        #   model: "TorusGeometry(0.3, 0.15, 15, 15 )",
+        #   orientation: %{up: [0, 0, -1], facing: [0, -1, 0]}
         # },
         # knight4: %{
         #   name: "knight4",
-        #   coords: [4, 5, 5],
+        #   position: [4, 5, 5],
+        #   moves: [],
         #   owner: "player2",
         #   color: 0xC7D1DA,
-        #   model: "IcosahedronGeometry( 0.45 )"
+        #   model: "IcosahedronGeometry( 0.45 )",
+        #   orientation: %{up: [0, 0, -1], facing: [0, -1, 0]}
         # },
         # rook4: %{
         #   name: "rook4",
-        #   coords: [5, 5, 5],
+        #   position: [5, 5, 5],
+        #   moves: [],
         #   owner: "player2",
         #   color: 0xC7D1DA,
-        #   model: "BoxGeometry( 0.5, 0.5, 0.5 )"
+        #   model: "BoxGeometry( 0.5, 0.5, 0.5 )",
+        #   orientation: %{up: [0, 0, -1], facing: [0, -1, 0]}
         # },
         # pawn11: %{
         #   name: "pawn11",
-        #   coords: [1, 4, 5],
+        #   position: [1, 4, 5],
+        #   moves: [],
         #   owner: "player2",
         #   color: 0xC7D1DA,
-        #   model: "TetrahedronGeometry( 0.5 )"
+        #   model: "TetrahedronGeometry( 0.5 )",
+        #   orientation: %{up: [0, 0, -1], facing: [0, -1, 0]}
         # },
         # pawn12: %{
         #   name: "pawn12",
-        #   coords: [2, 4, 5],
+        #   position: [2, 4, 5],
+        #   moves: [],
         #   owner: "player2",
         #   color: 0xC7D1DA,
-        #   model: "TetrahedronGeometry( 0.5 )"
+        #   model: "TetrahedronGeometry( 0.5 )",
+        #   orientation: %{up: [0, 0, -1], facing: [0, -1, 0]}
         # },
         # pawn13: %{
         #   name: "pawn13",
-        #   coords: [3, 4, 5],
+        #   position: [3, 4, 5],
+        #   moves: [],
         #   owner: "player2",
         #   color: 0xC7D1DA,
-        #   model: "TetrahedronGeometry( 0.5 )"
+        #   model: "TetrahedronGeometry( 0.5 )",
+        #   orientation: %{up: [0, 0, -1], facing: [0, -1, 0]}
         # },
         # pawn14: %{
         #   name: "pawn14",
-        #   coords: [4, 4, 5],
+        #   position: [4, 4, 5],
+        #   moves: [],
         #   owner: "player2",
         #   color: 0xC7D1DA,
-        #   model: "TetrahedronGeometry( 0.5 )"
+        #   model: "TetrahedronGeometry( 0.5 )",
+        #   orientation: %{up: [0, 0, -1], facing: [0, -1, 0]}
         # },
         # pawn15: %{
         #   name: "pawn15",
-        #   coords: [5, 4, 5],
+        #   position: [5, 4, 5],
+        #   moves: [],
         #   owner: "player2",
         #   color: 0xC7D1DA,
-        #   model: "TetrahedronGeometry( 0.5 )"
+        #   model: "TetrahedronGeometry( 0.5 )",
+        #   orientation: %{up: [0, 0, -1], facing: [0, -1, 0]}
         # },
         # unicorn3: %{
         #   name: "unicorn3",
-        #   coords: [1, 5, 4],
+        #   position: [1, 5, 4],
+        #   moves: [],
         #   owner: "player2",
         #   color: 0xC7D1DA,
-        #   model: "ConeGeometry(0.3, 0.8, 15 )"
+        #   model: "ConeGeometry(0.3, 0.8, 15 )",
+        #   orientation: %{up: [0, 0, -1], facing: [0, -1, 0]}
         # },
         # bishop3: %{
         #   name: "bishop3",
-        #   coords: [2, 5, 4],
+        #   position: [2, 5, 4],
+        #   moves: [],
         #   owner: "player2",
         #   color: 0xC7D1DA,
-        #   model: "OctahedronGeometry( 0.5 )"
+        #   model: "OctahedronGeometry( 0.5 )",
+        #   orientation: %{up: [0, 0, -1], facing: [0, -1, 0]}
         # },
         # queen2: %{
         #   name: "queen2",
-        #   coords: [3, 5, 4],
+        #   position: [3, 5, 4],
+        #   moves: [],
         #   owner: "player2",
         #   color: 0xC7D1DA,
-        #   model: "TorusGeometry(0.3, 0.15, 15, 15 )"
+        #   model: "TorusGeometry(0.3, 0.15, 15, 15 )",
+        #   orientation: %{up: [0, 0, -1], facing: [0, -1, 0]}
         # },
         # unicorn4: %{
         #   name: "unicorn4",
-        #   coords: [4, 5, 4],
+        #   position: [4, 5, 4],
+        #   moves: [],
         #   owner: "player2",
         #   color: 0xC7D1DA,
-        #   model: "ConeGeometry(0.3, 0.8, 15 )"
+        #   model: "ConeGeometry(0.3, 0.8, 15 )",
+        #   orientation: %{up: [0, 0, -1], facing: [0, -1, 0]}
         # },
         # bishop4: %{
         #   name: "bishop4",
-        #   coords: [5, 5, 4],
+        #   position: [5, 5, 4],
+        #   moves: [],
         #   owner: "player2",
         #   color: 0xC7D1DA,
-        #   model: "OctahedronGeometry( 0.5 )"
+        #   model: "OctahedronGeometry( 0.5 )",
+        #   orientation: %{up: [0, 0, -1], facing: [0, -1, 0]}
         # },
         # pawn16: %{
         #   name: "pawn16",
-        #   coords: [1, 4, 4],
+        #   position: [1, 4, 4],
+        #   moves: [],
         #   owner: "player2",
         #   color: 0xC7D1DA,
-        #   model: "TetrahedronGeometry( 0.5 )"
+        #   model: "TetrahedronGeometry( 0.5 )",
+        #   orientation: %{up: [0, 0, -1], facing: [0, -1, 0]}
         # },
         # pawn17: %{
         #   name: "pawn17",
-        #   coords: [2, 4, 4],
+        #   position: [2, 4, 4],
+        #   moves: [],
         #   owner: "player2",
         #   color: 0xC7D1DA,
-        #   model: "TetrahedronGeometry( 0.5 )"
+        #   model: "TetrahedronGeometry( 0.5 )",
+        #   orientation: %{up: [0, 0, -1], facing: [0, -1, 0]}
         # },
         # pawn18: %{
         #   name: "pawn18",
-        #   coords: [3, 4, 4],
+        #   position: [3, 4, 4],
+        #   moves: [],
         #   owner: "player2",
         #   color: 0xC7D1DA,
-        #   model: "TetrahedronGeometry( 0.5 )"
+        #   model: "TetrahedronGeometry( 0.5 )",
+        #   orientation: %{up: [0, 0, -1], facing: [0, -1, 0]}
         # },
         # pawn19: %{
         #   name: "pawn19",
-        #   coords: [4, 4, 4],
+        #   position: [4, 4, 4],
+        #   moves: [],
         #   owner: "player2",
         #   color: 0xC7D1DA,
-        #   model: "TetrahedronGeometry( 0.5 )"
+        #   model: "TetrahedronGeometry( 0.5 )",
+        #   orientation: %{up: [0, 0, -1], facing: [0, -1, 0]}
         # },
         # pawn20: %{
         #   name: "pawn20",
-        #   coords: [5, 4, 4],
+        #   position: [5, 4, 4],
+        #   moves: [],
         #   owner: "player2",
         #   color: 0xC7D1DA,
-        #   model: "TetrahedronGeometry( 0.5 )"
+        #   model: "TetrahedronGeometry( 0.5 )",
+        #   orientation: %{up: [0, 0, -1], facing: [0, -1, 0]}
         # }
       }
     },

@@ -5,7 +5,7 @@ window.THREE = THREE
 const screenSize = 1.5
 const ThreeHook = {
     mounted(){
-    // const hook = this
+    const hook = this
     const scene = new THREE.Scene();
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth /screenSize , window.innerHeight/ screenSize);
@@ -31,9 +31,7 @@ const ThreeHook = {
     "forward": [0, 1, 0] 
   }
   //Stores moves and location information
-    let pieceInfo = [
-    {name: 'pawn11', position: [3, 3, 3], moves: [[3, 3, 4], [3, 4, 3]]}
-    ]
+    let pieceInfo = []
     const color = 0xFFFFFF;
     const intensity = 10;
     let light = new THREE.DirectionalLight(color, intensity);
@@ -255,18 +253,16 @@ function addHighlightedMoves(listOfMoves){
   }
 
   function movePiece(piece, endingPosition){
-    console.log("is this thing on?")
     const [x, y, z] = endingPosition
-    const piece = scene.getObjectByName(piece)
-    piece.position.set(x, y, z)
+    const selectedPiece = scene.getObjectByName(piece)
+    selectedPiece.position.set(x, y, z)
   }
 
   function makeMove(piece, endingPosition){
-    console.log(endingPosition, "WHQAT THE FUASIUADSIU")
     const pieceInfo = returnInfoOfPieceByName(piece)
     if (moveLegal(endingPosition, pieceInfo.moves)){
       movePiece(piece, endingPosition)
-      hook.pushEvent("make_move", {move: [4, 5, 6]})
+      hook.pushEvent("makeMove", {move: endingPosition})
     } 
   }
 
@@ -292,7 +288,7 @@ function addHighlightedMoves(listOfMoves){
 
 
   //primitive
-  function renderBoard(payload){
+  function setupBoard(payload){
     // scene.clear()
     dimensions = payload.board_dimensions
     const columns = dimensions.columns 
@@ -301,28 +297,37 @@ function addHighlightedMoves(listOfMoves){
     render3Dgrid(rows, columns, levels)
     const pieces = payload.pieces
     for (const [piece, info] of Object.entries(pieces)) {
-
-      // const geometry = eval(`new THREE.${info.model}`)
-      //CHANGE THIS
-      const geometry = new THREE.TetrahedronGeometry(0.5)
+      const model = info.model
+      const evalObj = { eval };
+      const geometry = evalObj.eval(`new THREE.${model}`)
       const material = new THREE.MeshStandardMaterial( { color: info.color, roughness: 0.477, metalness: 1} )
       const obj = new THREE.Mesh( geometry, material );
 
       scene.add(obj)
-      const [x, y, z] = info.coords
+      const [x, y, z] = info.position
       obj.position.set(x, y, z)
       obj.name = piece
+
+      const new_info = {
+        name: piece,
+        position: info.position,
+        moves: info.moves
+      }
+      addPieceInfo(new_info)
     }
   }
 
+  function addPieceInfo(new_info){
+    pieceInfo.push(new_info)
+  }
+
   function setupGame(payload){
-    renderBoard(payload)
+    setupBoard(payload)
     setupCenter(payload)
     setupRotationalInfo()
     setupCamera()
     setupLights()
     addCursorCube(center[0], center[1], center[2])
-
   }
 
  
@@ -342,12 +347,10 @@ function addHighlightedMoves(listOfMoves){
           } else {
               gridGroup.visible = true
           }
-          console.log("Yes Toggle", payload)
     })
 
     this.handleEvent("update_game", (payload) => {
       console.log(payload, "PAYLOAD")
-      // renderBoard(payload)
 })
 
 //For cursor movement
@@ -358,7 +361,6 @@ function addHighlightedMoves(listOfMoves){
   function getPositionFromRotationInfo(up, facing){
     for (let i = 0; i < rotationInfo.length; i++){
       if (arraysEqual(rotationInfo[i]["up"], up) && arraysEqual(rotationInfo[i]["facing"], facing)){
-        console.log(up, facing)
         return rotationInfo[i]["position"]
       }
     }
@@ -816,7 +818,6 @@ function addHighlightedMoves(listOfMoves){
     
   }
   this.handleEvent("keydown", (payload) => {
-    console.log(payload.key, "FUCK YOU SHITFUCKSAOKASODKDASOKDASKO")
   if (payload.key == "q"){
     const possibleNewPosition = applyTransformationToPosition(cursorTransformations.up, cursorPosition)
     maybeMove(possibleNewPosition)
@@ -869,8 +870,7 @@ function addHighlightedMoves(listOfMoves){
   }
   
   if (payload.key == "Enter"){
-    console.log("FUCK!")
-    // handleSelect()
+    handleSelect()
   }
 
   if (payload.key == "Backspace"){
