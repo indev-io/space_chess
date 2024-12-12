@@ -58,18 +58,25 @@ defmodule SpaceChess.Game.DummyData do
     ]
   }
 
+  # promotion zones are zones where you the PLAYER can promote their pieces.
+  # promotion zones are often on the opposite side of the map
   @dummy_process_data [
     %{
       game_id: "abc123",
-      players: [
-        %{id: 2, name: "devin"},
-        %{id: 4, name: "bizarro_devin"}
-      ],
-      turn: :player1,
+      players: %{
+        1 => %{id: 2, name: "devin"},
+        2 => %{id: 4, name: "bizarro_devin"}
+      },
+      turn: 1,
+      round: 1,
+      promotion_zone: %{
+        1 => [{1, 5, 5}, {2, 5, 5}, {3, 5, 5}, {4, 5, 5}, {5, 5, 5}],
+        2 => [{1, 1, 1}, {2, 1, 1}, {3, 1, 1}, {4, 1, 1}, {5, 1, 1}]
+      },
       piece_behavior: %{
         pawn: %{
           abbreviation: "p",
-          opts: [],
+          opts: [regular_promotion: true],
           movement: [
             %{transformation: {0, 1, 0}, steps: 1, opts: [movement_only: true], branches: []},
             %{transformation: {0, 0, 1}, steps: 1, opts: [movement_only: true], branches: []},
@@ -535,7 +542,7 @@ defmodule SpaceChess.Game.DummyData do
         },
         king: %{
           abbreviation: "u",
-          opts: [],
+          opts: [is_king: true],
           movement: [
             %{transformation: {0, 0, -1}, steps: 1, opts: [], branches: []},
             %{transformation: {0, 1, 0}, steps: 1, opts: [], branches: []},
@@ -568,282 +575,322 @@ defmodule SpaceChess.Game.DummyData do
       },
       piece_info: %{
         pawn1: %{
-          owner: :player1,
+          owner: 1,
           behavior: :pawn,
+          value: 3,
           color: 0xD4AF37,
           model: "BoxGeometry( 0.5, 0.5, 0.5 )",
           orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
         },
         pawn2: %{
-          owner: :player1,
+          owner: 1,
           behavior: :pawn,
+          value: 3,
           color: 0xD4AF37,
           model: "BoxGeometry( 0.5, 0.5, 0.5 )",
           orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
         },
         pawn3: %{
-          owner: :player1,
+          owner: 1,
           behavior: :pawn,
+          value: 3,
           color: 0xD4AF37,
           model: "BoxGeometry( 0.5, 0.5, 0.5 )",
           orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
         },
         pawn4: %{
-          owner: :player1,
+          owner: 1,
           behavior: :pawn,
           color: 0xD4AF37,
+          value: 3,
           model: "BoxGeometry( 0.5, 0.5, 0.5 )",
           orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
         },
         pawn5: %{
-          owner: :player1,
+          owner: 1,
           behavior: :pawn,
           color: 0xD4AF37,
+          value: 3,
           model: "BoxGeometry( 0.5, 0.5, 0.5 )",
           orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
         },
         pawn6: %{
-          owner: :player1,
+          owner: 1,
           behavior: :pawn,
           color: 0xD4AF37,
+          value: 3,
           model: "BoxGeometry( 0.5, 0.5, 0.5 )",
           orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
         },
         pawn7: %{
-          owner: :player1,
+          owner: 1,
           behavior: :pawn,
           color: 0xD4AF37,
+          value: 3,
           model: "BoxGeometry( 0.5, 0.5, 0.5 )",
           orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
         },
         pawn8: %{
-          owner: :player1,
+          owner: 1,
           behavior: :pawn,
           color: 0xD4AF37,
+          value: 3,
           model: "BoxGeometry( 0.5, 0.5, 0.5 )",
           orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
         },
         pawn9: %{
-          owner: :player1,
+          owner: 1,
           behavior: :pawn,
           color: 0xD4AF37,
+          value: 3,
           model: "BoxGeometry( 0.5, 0.5, 0.5 )",
           orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
         },
         pawn10: %{
-          owner: :player1,
+          owner: 1,
           behavior: :pawn,
           color: 0xD4AF37,
+          value: 3,
           model: "BoxGeometry( 0.5, 0.5, 0.5 )",
           orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
         },
         rook1: %{
-          owner: :player1,
+          owner: 1,
           behavior: :rook,
           color: 0xD4AF37,
+          value: 12,
           model: "BoxGeometry( 0.5, 0.5, 0.5 )",
           orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
         },
         rook2: %{
-          owner: :player1,
+          owner: 1,
           behavior: :rook,
           color: 0xD4AF37,
+          value: 12,
           model: "BoxGeometry( 0.5, 0.5, 0.5 )",
           orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
         },
         knight1: %{
-          owner: :player1,
+          owner: 1,
           behavior: :knight,
           color: 0xD4AF37,
+          value: 24,
           model: "IcosahedronGeometry( 0.45 )",
           orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
         },
         knight2: %{
-          owner: :player1,
+          owner: 1,
           behavior: :knight,
           color: 0xD4AF37,
+          value: 24,
           model: "IcosahedronGeometry( 0.45 )",
           orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
         },
         bishop1: %{
-          owner: :player1,
+          owner: 1,
           behavior: :bishop,
           color: 0xD4AF37,
+          value: 22,
           model: "OctahedronGeometry( 0.5 )",
           orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
         },
         bishop2: %{
-          owner: :player1,
+          owner: 1,
           behavior: :bishop,
           color: 0xD4AF37,
+          value: 22,
           model: "OctahedronGeometry( 0.5 )",
           orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
         },
         unicorn1: %{
-          owner: :player1,
+          owner: 1,
           behavior: :unicorn,
           color: 0xD4AF37,
+          value: 16,
           model: "ConeGeometry(0.3, 0.8, 15 )",
           orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
         },
         unicorn2: %{
-          owner: :player1,
+          owner: 1,
           behavior: :unicorn,
           color: 0xD4AF37,
+          value: 16,
           model: "ConeGeometry(0.3, 0.8, 15 )",
           orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
         },
         king1: %{
-          owner: :player1,
+          owner: 1,
           behavior: :king,
           color: 0xD4AF37,
+          value: 100_024,
           model: "TorusGeometry(0.3, 0.15, 15, 15 )",
           orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
         },
         queen1: %{
-          owner: :player1,
+          owner: 1,
           behavior: :king,
           color: 0xD4AF37,
+          value: 48,
           model: "SphereGeometry( 0.4, 15, 15)",
           orientation: %{up: {0, 0, 1}, facing: {0, 1, 0}}
         },
         pawn11: %{
           owner: :player2,
           behavior: :pawn,
+          value: 3,
           color: 0xC7D1DA,
           model: "TetrahedronGeometry( 0.5 )",
           orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
         },
         pawn12: %{
-          owner: :player2,
+          owner: 2,
           behavior: :pawn,
+          value: 3,
           color: 0xC7D1DA,
           model: "TetrahedronGeometry( 0.5 )",
           orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
         },
         pawn13: %{
-          owner: :player2,
+          owner: 2,
           behavior: :pawn,
+          value: 3,
           color: 0xC7D1DA,
           model: "TetrahedronGeometry( 0.5 )",
           orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
         },
         pawn14: %{
-          owner: :player2,
+          owner: 2,
           behavior: :pawn,
+          value: 3,
           color: 0xC7D1DA,
           model: "TetrahedronGeometry( 0.5 )",
           orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
         },
         pawn15: %{
-          owner: :player2,
+          owner: 2,
           behavior: :pawn,
+          value: 3,
           color: 0xC7D1DA,
           model: "TetrahedronGeometry( 0.5 )",
           orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
         },
         pawn16: %{
-          owner: :player2,
+          owner: 2,
           behavior: :pawn,
+          value: 3,
           color: 0xC7D1DA,
           model: "TetrahedronGeometry( 0.5 )",
           orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
         },
         pawn17: %{
-          owner: :player2,
+          owner: 2,
           behavior: :pawn,
+          value: 3,
           color: 0xC7D1DA,
           model: "TetrahedronGeometry( 0.5 )",
           orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
         },
         pawn18: %{
-          owner: :player2,
+          owner: 2,
           behavior: :pawn,
+          value: 3,
           color: 0xC7D1DA,
           model: "TetrahedronGeometry( 0.5 )",
           orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
         },
         pawn19: %{
-          owner: :player2,
+          owner: 2,
           behavior: :pawn,
+          value: 3,
           color: 0xC7D1DA,
           model: "TetrahedronGeometry( 0.5 )",
           orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
         },
         pawn20: %{
-          owner: :player2,
+          owner: 2,
           behavior: :pawn,
+          value: 3,
           color: 0xC7D1DA,
           model: "TetrahedronGeometry( 0.5 )",
           orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
         },
         rook3: %{
-          owner: :player2,
+          owner: 2,
           behavior: :rook,
           color: 0xC7D1DA,
+          value: 12,
           model: "BoxGeometry( 0.5, 0.5, 0.5 )",
           orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
         },
         rook4: %{
-          owner: :player2,
+          owner: 2,
           behavior: :rook,
           color: 0xC7D1DA,
+          value: 12,
           model: "BoxGeometry( 0.5, 0.5, 0.5 )",
           orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
         },
         knight3: %{
-          owner: :player2,
+          owner: 2,
           behavior: :knight,
           color: 0xC7D1DA,
+          value: 24,
           model: "IcosahedronGeometry( 0.45 )",
           orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
         },
         knight4: %{
-          owner: :player2,
+          owner: 2,
           behavior: :knight,
           color: 0xC7D1DA,
+          value: 24,
           model: "IcosahedronGeometry( 0.45 )",
           orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
         },
         bishop3: %{
-          owner: :player2,
+          owner: 2,
           behavior: :bishop,
           color: 0xC7D1DA,
+          value: 22,
           model: "OctahedronGeometry( 0.5 )",
           orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
         },
         bishop4: %{
-          owner: :player2,
+          owner: 2,
           behavior: :bishop,
           color: 0xC7D1DA,
+          value: 22,
           model: "OctahedronGeometry( 0.5 )",
           orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
         },
         unicorn3: %{
-          owner: :player2,
+          owner: 2,
           behavior: :unicorn,
           color: 0xC7D1DA,
+          value: 16,
           model: "ConeGeometry(0.3, 0.8, 15 )",
           orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
         },
         unicorn4: %{
-          owner: :player2,
+          owner: 2,
           behavior: :unicorn,
           color: 0xC7D1DA,
+          value: 16,
           model: "ConeGeometry(0.3, 0.8, 15 )",
           orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
         },
         king2: %{
-          owner: :player2,
+          owner: 2,
           behavior: :king,
           color: 0xC7D1DA,
+          value: 100_024,
           model: "TorusGeometry(0.3, 0.15, 15, 15 )",
           orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
         },
         queen2: %{
-          owner: :player2,
+          owner: 2,
           behavior: :queen,
           color: 0xC7D1DA,
+          value: 48,
           model: "TorusGeometry(0.3, 0.15, 15, 15 )",
           orientation: %{up: {0, 0, -1}, facing: {0, -1, 0}}
         }

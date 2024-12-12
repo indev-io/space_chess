@@ -856,6 +856,38 @@ defmodule SpaceChess.GameEngine do
     {round(rows / 2), round(columns / 2), round(levels / 2)}
   end
 
+  # adds a bonus points to pawns
+  def find_closeness_value_of_promotable_piece(piece_position, game_obj) do
+    {_name, piece_obj} = highest_possible_promotion_option(game_obj)
+    name = game_obj.board[piece_position]
+    owner = game_obj.piece_info[name][:owner]
+    promotion_zone = game_obj.promotion_zone[owner]
+    promoted_value = piece_obj.value
+
+    nearest_promotion_zone_position =
+      find_nearest_position_in_zone(piece_position, promotion_zone)
+
+    distance = distance_between_two_points(piece_position, nearest_promotion_zone_position)
+
+    starting_distance = 4.243
+
+    closeness = 1 - distance / starting_distance
+    # as closeness approaches 1, value becomes highest value
+    closeness_multiplier = 0.125
+    promoted_value * closeness * closeness_multiplier
+  end
+
+  def highest_possible_promotion_option(game_obj) do
+    piece_info = game_obj.piece_info
+    piece_behavior = game_obj.piece_behavior
+
+    piece_info
+    |> Enum.reject(fn {_key, value} ->
+      Keyword.has_key?(piece_behavior[value.behavior][:opts], :is_king)
+    end)
+    |> Enum.max_by(fn {_key, value} -> value.value end)
+  end
+
   def determine_value_of_piece(piece_behavior, board) do
     movement = piece_behavior.movement
 
@@ -891,14 +923,42 @@ defmodule SpaceChess.GameEngine do
     value =
       if Keyword.has_key?(piece_behavior.opts, :is_king) do
         value + 100_000
+      else
+        value
       end
 
     round(value)
   end
 
+  def next_turn(game_obj) do
+    turn = game_obj.turn + 1
+    num_players = map_size(game_obj.players)
+    round = game_obj.round
+
+    if turn > num_players do
+      game_obj
+      |> Map.put(:turn, 1)
+      |> Map.put(:round, round + 1)
+    else
+      Map.put(game_obj, :turn, turn)
+    end
+  end
+
   # WORK ON THIS TOMORROW *************
-  def determine_value_of_board(board) do
-    {rows, columns, levels} = get_board_dimensions(board)
+  def determine_value_of_board(game_obj) do
+    board = game_obj.board
+
+    Enum.reduce(board, 0, fn {_key, value}, acc ->
+      if value === :empty do
+        acc
+      else
+        if game_obj.piece_info[value][:owner] === game_obj.turn do
+          acc + game_obj.piece_info[value][:value]
+        else
+          acc - game_obj.piece_info[value][:value]
+        end
+      end
+    end)
 
     # lookup pieces
     # determine how close each piece is to the center (possibly)
@@ -948,6 +1008,10 @@ defmodule SpaceChess.GameEngine do
       end
     end)
   end
+
+  # def puts_piece_in_danger?(gameObj) do
+  #   moves = get_all_moves_of_all_pieces(gameObj)
+  # end
 
   # pieces on board will be :empty or have name which can be used to look up piece_status
 
@@ -1241,6 +1305,18 @@ defmodule SpaceChess.GameEngine do
     |> apply_position(nz_pos, -z)
   end
 
+  def rotate_transformations_based_on_orientation(orientation, movement) do
+  end
+
+  def update_transformation_crawler([current_obj | remaining_objs], orientation) do
+    updated_head = Map.put(current_obj, :transformation, :huh)
+    [updated_head * 2 | update_transformation_crawler(remaining_objs)]
+  end
+
+  def update_transformation_crawler([]) do
+    []
+  end
+
   defp apply_position(coords, nil, _pos), do: coords
 
   defp apply_position(coords, val, pos) do
@@ -1253,8 +1329,9 @@ defmodule SpaceChess.GameEngine do
   end
 
   ## player 1 default is up_direction {0, 0, 1} facing_direction {0, 1, 0}
+  ## player 3 default is up_direction {0, 0, -1} facing_direction {0, -1, 0}
   ## takes in orientation object: %{up: up, facing: facing }
-  def set_orientation(orientation) do
+  defp orientation_to_transformation(orientation) do
     case orientation do
       %{top: {0, 0, 1}, facing: {0, 1, 0}} -> {:px, :py, :pz}
       %{top: {0, 0, 1}, facing: {1, 0, 0}} -> {:py, :nx, :pz}
