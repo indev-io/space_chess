@@ -944,7 +944,6 @@ defmodule SpaceChess.GameEngine do
     end
   end
 
-  # WORK ON THIS TOMORROW *************
   def determine_value_of_board(game_obj) do
     board = game_obj.board
 
@@ -997,14 +996,21 @@ defmodule SpaceChess.GameEngine do
   def get_all_moves_of_all_pieces(gameObj) do
     board = gameObj.board
 
-    Enum.reduce(board, [], fn {key, value}, acc ->
+    Enum.reduce(board, %{}, fn {key, value}, acc ->
       if value === :empty do
         acc
       else
         behavior = gameObj.piece_info[value][:behavior]
         movement = gameObj.piece_behavior[behavior][:movement]
+
+        movement =
+          rotate_transformations_based_on_orientation(
+            movement,
+            gameObj.piece_info[value][:orientation]
+          )
+
         moves = get_all_moves_of_a_piece(key, movement, value, board)
-        [%{name: value, moves: moves} | acc]
+        Map.put(acc, value, moves)
       end
     end)
   end
@@ -1285,16 +1291,16 @@ defmodule SpaceChess.GameEngine do
 
   # custom transformation -> :px, :nx, :py, :ny, :pz, :nz
   # test {:ny, :px, :pz} should be the same as rotate_90_degrees_counterclockwise_along_z_axis
-  def transform_coordinates(coordinates, transformation) do
+  def transform_coordinates_by_generic_transformation(coordinates, generic_transformation) do
     coordinates = Tuple.to_list(coordinates)
-    transformation = Tuple.to_list(transformation)
+    generic_transformation = Tuple.to_list(generic_transformation)
     [x, y, z] = coordinates
-    px_pos = find_index(transformation, :px)
-    nx_pos = find_index(transformation, :nx)
-    py_pos = find_index(transformation, :py)
-    ny_pos = find_index(transformation, :ny)
-    pz_pos = find_index(transformation, :pz)
-    nz_pos = find_index(transformation, :nz)
+    px_pos = find_index(generic_transformation, :px)
+    nx_pos = find_index(generic_transformation, :nx)
+    py_pos = find_index(generic_transformation, :py)
+    ny_pos = find_index(generic_transformation, :ny)
+    pz_pos = find_index(generic_transformation, :pz)
+    nz_pos = find_index(generic_transformation, :nz)
 
     {:empty, :empty, :empty}
     |> apply_position(px_pos, x)
@@ -1303,18 +1309,6 @@ defmodule SpaceChess.GameEngine do
     |> apply_position(ny_pos, -y)
     |> apply_position(pz_pos, z)
     |> apply_position(nz_pos, -z)
-  end
-
-  def rotate_transformations_based_on_orientation(orientation, movement) do
-  end
-
-  def update_transformation_crawler([current_obj | remaining_objs], orientation) do
-    updated_head = Map.put(current_obj, :transformation, :huh)
-    [updated_head * 2 | update_transformation_crawler(remaining_objs)]
-  end
-
-  def update_transformation_crawler([]) do
-    []
   end
 
   defp apply_position(coords, nil, _pos), do: coords
@@ -1328,19 +1322,46 @@ defmodule SpaceChess.GameEngine do
     |> Enum.find_index(fn x -> x === pos end)
   end
 
+  def rotate_transformations_based_on_orientation(movement, orientation) do
+    generic_transformation = orientation_to_generic_transformation(orientation)
+    update_transformation_crawler(movement, generic_transformation)
+  end
+
+  defp update_transformation_crawler([current_obj | remaining_objs], generic_transformation) do
+    new_transformation =
+      transform_coordinates_by_generic_transformation(
+        current_obj.transformation,
+        generic_transformation
+      )
+
+    updated_head = Map.put(current_obj, :transformation, new_transformation)
+
+    updated_head =
+      Map.put(
+        updated_head,
+        :branches,
+        update_transformation_crawler(updated_head.branches, generic_transformation)
+      )
+
+    [updated_head | update_transformation_crawler(remaining_objs, generic_transformation)]
+  end
+
+  defp update_transformation_crawler([], _generic_transformation) do
+    []
+  end
+
   ## player 1 default is up_direction {0, 0, 1} facing_direction {0, 1, 0}
-  ## player 3 default is up_direction {0, 0, -1} facing_direction {0, -1, 0}
-  ## takes in orientation object: %{up: up, facing: facing }
-  defp orientation_to_transformation(orientation) do
+  ## player 2 default is up_direction {0, 0, -1} facing_direction {0, -1, 0}
+  defp orientation_to_generic_transformation(orientation) do
     case orientation do
-      %{top: {0, 0, 1}, facing: {0, 1, 0}} -> {:px, :py, :pz}
-      %{top: {0, 0, 1}, facing: {1, 0, 0}} -> {:py, :nx, :pz}
-      %{top: {0, 0, 1}, facing: {0, -1, 0}} -> {:nx, :ny, :pz}
-      %{top: {0, 0, 1}, facing: {-1, 0, 0}} -> {:ny, :px, :pz}
-      %{top: {0, 0, -1}, facing: {0, 1, 0}} -> {:px, :py, :nz}
-      %{top: {0, 0, -1}, facing: {1, 0, 0}} -> {:py, :nx, :nz}
-      %{top: {0, 0, -1}, facing: {0, -1, 0}} -> {:nx, :ny, :nz}
-      %{top: {0, 0, -1}, facing: {-1, 0, 0}} -> {:ny, :px, :nz}
+      %{up: {0, 0, 1}, facing: {0, 1, 0}} -> {:px, :py, :pz}
+      %{up: {0, 0, 1}, facing: {1, 0, 0}} -> {:py, :nx, :pz}
+      %{up: {0, 0, 1}, facing: {0, -1, 0}} -> {:nx, :ny, :pz}
+      %{up: {0, 0, 1}, facing: {-1, 0, 0}} -> {:ny, :px, :pz}
+      %{up: {0, 0, -1}, facing: {0, 1, 0}} -> {:px, :py, :nz}
+      %{up: {0, 0, -1}, facing: {1, 0, 0}} -> {:py, :nx, :nz}
+      %{up: {0, 0, -1}, facing: {0, -1, 0}} -> {:nx, :ny, :nz}
+      %{up: {0, 0, -1}, facing: {-1, 0, 0}} -> {:ny, :px, :nz}
     end
   end
 end
