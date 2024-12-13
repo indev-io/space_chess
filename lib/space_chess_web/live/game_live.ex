@@ -87,10 +87,9 @@ defmodule SpaceChessWeb.GameLive do
     {:noreply, push_event(socket, "toggle_grid", %{message: "toggle_grid"})}
   end
 
-  def handle_event("update_board", _params, socket) do
-    data = GameEngine.create_default_setup()
-    {:noreply, push_event(socket, "update_board", data)}
-  end
+  # def handle_event("update_board", _params, socket) do
+  #   {:noreply, push_event(socket, "update_board", data)}
+  # end
 
   def handle_event("spin_right", _params, socket) do
     board_dimensions = IO.inspect(socket.assigns.game_data.board_dimensions)

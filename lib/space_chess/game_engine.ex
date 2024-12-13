@@ -25,812 +25,45 @@ defmodule SpaceChess.GameEngine do
   # {-1, 0, 1},{0, 0, 1},{1, 0, 1},
   # {-1, -1, 1},{0, -1, 1},{1, -1, 1}
 
-  @matrix_to_transformations %{
-    {0, 0, 0} => {-1, 1, -1},
-    {0, 0, 1} => {0, 1, -1},
-    {0, 0, 2} => {1, 1, -1},
-    {0, 1, 0} => {-1, 0, -1},
-    {0, 1, 1} => {0, 0, -1},
-    {0, 1, 2} => {1, 0, -1},
-    {0, 2, 0} => {-1, -1, -1},
-    {0, 2, 1} => {0, -1, -1},
-    {0, 2, 2} => {1, -1, -1},
-    {1, 0, 0} => {-1, 1, 0},
-    {1, 0, 1} => {0, 1, 0},
-    {1, 0, 2} => {1, 1, 0},
-    {1, 1, 0} => {-1, 0, 0},
-    {1, 1, 1} => {0, 0, 0},
-    {1, 1, 2} => {1, 0, 0},
-    {1, 2, 0} => {-1, -1, 0},
-    {1, 2, 1} => {0, -1, 0},
-    {1, 2, 2} => {1, -1, 0},
-    {2, 0, 0} => {-1, 1, 1},
-    {2, 0, 1} => {0, 1, 1},
-    {2, 0, 2} => {1, 1, 1},
-    {2, 1, 0} => {-1, 0, 1},
-    {2, 1, 1} => {0, 0, 1},
-    {2, 1, 2} => {1, 0, 1},
-    {2, 2, 0} => {-1, -1, 1},
-    {2, 2, 1} => {0, -1, 1},
-    {2, 2, 2} => {1, -1, 1}
-  }
-
-  def matrix_to_transformations(matrix) do
-    Map.get(@matrix_to_transformations, matrix)
-  end
-
-  @piece_behavior %{
-    pawn: %{
-      abbreviation: "p",
-      opts: [],
-      movement: [
-        %{transformation: {0, 1, 0}, steps: 1, opts: [movement_only: true], branches: []},
-        %{transformation: {0, 0, 1}, steps: 1, opts: [movement_only: true], branches: []},
-        %{transformation: {-1, 1, 0}, steps: 1, opts: [capture_only: true], branches: []},
-        %{transformation: {1, 1, 0}, steps: 1, opts: [capture_only: true], branches: []},
-        %{transformation: {-1, 0, 1}, steps: 1, opts: [capture_only: true], branches: []},
-        %{transformation: {1, 0, 1}, steps: 1, opts: [capture_only: true], branches: []}
-      ]
-    },
-    rook: %{
-      abbreviation: "r",
-      opts: [],
-      movement: [
-        %{transformation: {0, 0, -1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {0, 1, 0}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {-1, 0, 0}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {1, 0, 0}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {0, -1, 0}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {0, 0, 1}, steps: :infinity, opts: [], branches: []}
-      ]
-    },
-    knight: %{
-      abbreviation: "n",
-      opts: [],
-      movement: [
-        %{
-          transformation: {0, 0, -1},
-          steps: 1,
-          opts: [dont_record: true, jump: true],
-          branches: [
-            %{
-              transformation: {0, 1, 0},
-              steps: 2,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {-1, 0, 0},
-              steps: 2,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {1, 0, 0},
-              steps: 2,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {0, -1, 0},
-              steps: 2,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            }
-          ]
-        },
-        %{
-          transformation: {0, 1, 0},
-          steps: 1,
-          opts: [dont_record: true, jump: true],
-          branches: [
-            %{
-              transformation: {0, 0, -1},
-              steps: 2,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {-1, 0, 0},
-              steps: 2,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {1, 0, 0},
-              steps: 2,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {0, 0, 1},
-              steps: 2,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            }
-          ]
-        },
-        %{
-          transformation: {-1, 0, 0},
-          steps: 1,
-          opts: [dont_record: true, jump: true],
-          branches: [
-            %{
-              transformation: {0, 0, -1},
-              steps: 2,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {0, 1, 0},
-              steps: 2,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {0, -1, 0},
-              steps: 2,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {0, 0, 1},
-              steps: 2,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            }
-          ]
-        },
-        %{
-          transformation: {1, 0, 0},
-          steps: 1,
-          opts: [dont_record: true, jump: true],
-          branches: [
-            %{
-              transformation: {0, 0, -1},
-              steps: 2,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {0, 1, 0},
-              steps: 2,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {0, -1, 0},
-              steps: 2,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {0, 0, 1},
-              steps: 2,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            }
-          ]
-        },
-        %{
-          transformation: {0, -1, 0},
-          steps: 1,
-          opts: [dont_record: true, jump: true],
-          branches: [
-            %{
-              transformation: {0, 0, -1},
-              steps: 2,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {-1, 0, 0},
-              steps: 2,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {1, 0, 0},
-              steps: 2,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {0, 0, 1},
-              steps: 2,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            }
-          ]
-        },
-        %{
-          transformation: {0, 0, 1},
-          steps: 1,
-          opts: [dont_record: true, jump: true],
-          branches: [
-            %{
-              transformation: {0, 1, 0},
-              steps: 2,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {-1, 0, 0},
-              steps: 2,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {1, 0, 0},
-              steps: 2,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {0, -1, 0},
-              steps: 2,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            }
-          ]
-        },
-        %{
-          transformation: {0, 0, -1},
-          steps: 2,
-          opts: [dont_record: true, jump: true],
-          branches: [
-            %{
-              transformation: {0, 1, 0},
-              steps: 1,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {-1, 0, 0},
-              steps: 1,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {1, 0, 0},
-              steps: 1,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {0, -1, 0},
-              steps: 1,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            }
-          ]
-        },
-        %{
-          transformation: {0, 1, 0},
-          steps: 2,
-          opts: [dont_record: true, jump: true],
-          branches: [
-            %{
-              transformation: {0, 0, -1},
-              steps: 1,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {-1, 0, 0},
-              steps: 1,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {1, 0, 0},
-              steps: 1,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {0, 0, 1},
-              steps: 1,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            }
-          ]
-        },
-        %{
-          transformation: {-1, 0, 0},
-          steps: 2,
-          opts: [dont_record: true, jump: true],
-          branches: [
-            %{
-              transformation: {0, 0, -1},
-              steps: 1,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {0, 1, 0},
-              steps: 1,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {0, -1, 0},
-              steps: 1,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {0, 0, 1},
-              steps: 1,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            }
-          ]
-        },
-        %{
-          transformation: {1, 0, 0},
-          steps: 2,
-          opts: [dont_record: true, jump: true],
-          branches: [
-            %{
-              transformation: {0, 0, -1},
-              steps: 1,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {0, 1, 0},
-              steps: 1,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {0, -1, 0},
-              steps: 1,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {0, 0, 1},
-              steps: 1,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            }
-          ]
-        },
-        %{
-          transformation: {0, -1, 0},
-          steps: 2,
-          opts: [dont_record: true, jump: true],
-          branches: [
-            %{
-              transformation: {0, 0, -1},
-              steps: 1,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {-1, 0, 0},
-              steps: 1,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {1, 0, 0},
-              steps: 1,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {0, 0, 1},
-              steps: 1,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            }
-          ]
-        },
-        %{
-          transformation: {0, 0, 1},
-          steps: 2,
-          opts: [dont_record: true, jump: true],
-          branches: [
-            %{
-              transformation: {0, 1, 0},
-              steps: 1,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {-1, 0, 0},
-              steps: 1,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {1, 0, 0},
-              steps: 1,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            },
-            %{
-              transformation: {0, -1, 0},
-              steps: 1,
-              opts: [jump: true, endpoint_only: true],
-              branches: []
-            }
-          ]
-        }
-      ]
-    },
-    bishop: %{
-      abbreviation: "b",
-      opts: [],
-      movement: [
-        %{transformation: {0, 1, -1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {-1, 1, -1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {1, 0, -1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {0, -1, -1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {-1, -1, 0}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {1, 1, 0}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {-1, -1, 0}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {1, -1, 0}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {0, 1, 1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {-1, 0, 1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {1, 0, 1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {0, -1, 1}, steps: :infinity, opts: [], branches: []}
-      ]
-    },
-    unicorn: %{
-      abbreviation: "u",
-      opts: [],
-      movement: [
-        %{transformation: {-1, 1, -1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {1, 1, -1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {-1, -1, -1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {1, -1, -1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {-1, 1, 1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {1, 1, 1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {-1, -1, 1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {1, -1, 1}, steps: :infinity, opts: [], branches: []}
-      ]
-    },
-    queen: %{
-      abbreviation: "u",
-      opts: [],
-      movement: [
-        %{transformation: {0, 0, -1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {0, 1, 0}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {-1, 0, 0}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {1, 0, 0}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {0, -1, 0}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {0, 0, 1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {0, 1, -1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {-1, 1, -1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {1, 0, -1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {0, -1, -1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {-1, -1, 0}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {1, 1, 0}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {-1, -1, 0}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {1, -1, 0}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {0, 1, 1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {-1, 0, 1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {1, 0, 1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {0, -1, 1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {-1, 1, -1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {1, 1, -1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {-1, -1, -1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {1, -1, -1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {-1, 1, 1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {1, 1, 1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {-1, -1, 1}, steps: :infinity, opts: [], branches: []},
-        %{transformation: {1, -1, 1}, steps: :infinity, opts: [], branches: []}
-      ]
-    },
-    king: %{
-      abbreviation: "u",
-      opts: [],
-      movement: [
-        %{transformation: {0, 0, -1}, steps: 1, opts: [], branches: []},
-        %{transformation: {0, 1, 0}, steps: 1, opts: [], branches: []},
-        %{transformation: {-1, 0, 0}, steps: 1, opts: [], branches: []},
-        %{transformation: {1, 0, 0}, steps: 1, opts: [], branches: []},
-        %{transformation: {0, -1, 0}, steps: 1, opts: [], branches: []},
-        %{transformation: {0, 0, 1}, steps: 1, opts: [], branches: []},
-        %{transformation: {0, 1, -1}, steps: 1, opts: [], branches: []},
-        %{transformation: {-1, 1, -1}, steps: 1, opts: [], branches: []},
-        %{transformation: {1, 0, -1}, steps: 1, opts: [], branches: []},
-        %{transformation: {0, -1, -1}, steps: 1, opts: [], branches: []},
-        %{transformation: {-1, -1, 0}, steps: 1, opts: [], branches: []},
-        %{transformation: {1, 1, 0}, steps: 1, opts: [], branches: []},
-        %{transformation: {-1, -1, 0}, steps: 1, opts: [], branches: []},
-        %{transformation: {1, -1, 0}, steps: 1, opts: [], branches: []},
-        %{transformation: {0, 1, 1}, steps: 1, opts: [], branches: []},
-        %{transformation: {-1, 0, 1}, steps: 1, opts: [], branches: []},
-        %{transformation: {1, 0, 1}, steps: 1, opts: [], branches: []},
-        %{transformation: {0, -1, 1}, steps: 1, opts: [], branches: []},
-        %{transformation: {-1, 1, -1}, steps: 1, opts: [], branches: []},
-        %{transformation: {1, 1, -1}, steps: 1, opts: [], branches: []},
-        %{transformation: {-1, -1, -1}, steps: 1, opts: [], branches: []},
-        %{transformation: {1, -1, -1}, steps: 1, opts: [], branches: []},
-        %{transformation: {-1, 1, 1}, steps: 1, opts: [], branches: []},
-        %{transformation: {1, 1, 1}, steps: 1, opts: [], branches: []},
-        %{transformation: {-1, -1, 1}, steps: 1, opts: [], branches: []},
-        %{transformation: {1, -1, 1}, steps: 1, opts: [], branches: []}
-      ]
-    }
-  }
-
   # ELIXIR SIDE ONLY
-  def create_default_setup() do
-    board = create_board(5, 5, 5)
 
-    owner = %{
-      pawn1: :player1,
-      pawn2: :player1,
-      pawn3: :player1,
-      pawn4: :player1,
-      pawn5: :player1,
-      pawn6: :player1,
-      pawn7: :player1,
-      pawn8: :player1,
-      pawn9: :player1,
-      pawn10: :player1,
-      rook1: :player1,
-      rook2: :player1,
-      knight1: :player1,
-      knight2: :player1,
-      bishop1: :player1,
-      bishop2: :player1,
-      unicorn1: :player1,
-      unicorn2: :player1,
-      king1: :player1,
-      queen1: :player1,
-      pawn11: :player2,
-      pawn12: :player2,
-      pawn13: :player2,
-      pawn14: :player2,
-      pawn15: :player2,
-      pawn16: :player2,
-      pawn17: :player2,
-      pawn18: :player2,
-      pawn19: :player2,
-      pawn20: :player2,
-      rook3: :player2,
-      rook4: :player2,
-      knight3: :player2,
-      knight4: :player2,
-      bishop3: :player2,
-      bishop4: :player2,
-      unicorn3: :player2,
-      unicorn4: :player2,
-      king2: :player2,
-      queen2: :player2
-    }
 
-    behavior = %{
-      pawn1: :pawn,
-      pawn2: :pawn,
-      pawn3: :pawn,
-      pawn4: :pawn,
-      pawn5: :pawn,
-      pawn6: :pawn,
-      pawn7: :pawn,
-      pawn8: :pawn,
-      pawn9: :pawn,
-      pawn10: :pawn,
-      rook1: :rook,
-      rook2: :rook,
-      knight1: :knight,
-      knight2: :knight,
-      bishop1: :bishop,
-      bishop2: :bishop,
-      unicorn1: :unicorn,
-      unicorn2: :unicorn,
-      king1: :king,
-      queen1: :queen,
-      pawn11: :pawn,
-      pawn12: :pawn,
-      pawn13: :pawn,
-      pawn14: :pawn,
-      pawn15: :pawn,
-      pawn16: :pawn,
-      pawn17: :pawn,
-      pawn18: :pawn,
-      pawn19: :pawn,
-      pawn20: :pawn,
-      rook3: :rook,
-      rook4: :rook,
-      knight3: :knight,
-      knight4: :knight,
-      bishop3: :bishop,
-      bishop4: :bishop,
-      unicorn3: :unicorn,
-      unicorn4: :unicorn,
-      king2: :king,
-      queen2: :queen
-    }
-
-    moves = %{
-      pawn1: [],
-      pawn2: [],
-      pawn3: [],
-      pawn4: [],
-      pawn5: [],
-      pawn6: [],
-      pawn7: [],
-      pawn8: [],
-      pawn9: [],
-      pawn10: [],
-      rook1: [],
-      rook2: [],
-      knight1: [],
-      knight2: [],
-      bishop1: [],
-      bishop2: [],
-      unicorn1: [],
-      unicorn2: [],
-      king1: [],
-      queen1: [],
-      pawn11: [],
-      pawn12: [],
-      pawn13: [],
-      pawn14: [],
-      pawn15: [],
-      pawn16: [],
-      pawn17: [],
-      pawn18: [],
-      pawn19: [],
-      pawn20: [],
-      rook3: [],
-      rook4: [],
-      knight3: [],
-      knight4: [],
-      bishop3: [],
-      bishop4: [],
-      unicorn3: [],
-      unicorn4: [],
-      king2: [],
-      queen2: []
-    }
-
-    looks = %{
-      pawn1: "TetrahedronGeometry( 0.5 )",
-      pawn2: "TetrahedronGeometry( 0.5 )",
-      pawn3: "TetrahedronGeometry( 0.5 )",
-      pawn4: "TetrahedronGeometry( 0.5 )",
-      pawn5: "TetrahedronGeometry( 0.5 )",
-      pawn6: "TetrahedronGeometry( 0.5 )",
-      pawn7: "TetrahedronGeometry( 0.5 )",
-      pawn8: "TetrahedronGeometry( 0.5 )",
-      pawn9: "TetrahedronGeometry( 0.5 )",
-      pawn10: "TetrahedronGeometry( 0.5 )",
-      rook1: "BoxGeometry( 0.5, 0.5, 0.5 )",
-      rook2: "BoxGeometry( 0.5, 0.5, 0.5 )",
-      knight1: "IcosahedronGeometry( 0.45 )",
-      knight2: "IcosahedronGeometry( 0.45 )",
-      bishop1: "OctahedronGeometry( 0.5 )",
-      bishop2: "OctahedronGeometry( 0.5 )",
-      unicorn1: "ConeGeometry(0.3, 0.8, 15 )",
-      unicorn2: "ConeGeometry(0.3, 0.8, 15 )",
-      king1: "TorusGeometry(0.3, 0.15, 15, 15 )",
-      queen1: "SphereGeometry( 0.4, 15, 15)",
-      pawn11: "TetrahedronGeometry( 0.5 )",
-      pawn12: "TetrahedronGeometry( 0.5 )",
-      pawn13: "TetrahedronGeometry( 0.5 )",
-      pawn14: "TetrahedronGeometry( 0.5 )",
-      pawn15: "TetrahedronGeometry( 0.5 )",
-      pawn16: "TetrahedronGeometry( 0.5 )",
-      pawn17: "TetrahedronGeometry( 0.5 )",
-      pawn18: "TetrahedronGeometry( 0.5 )",
-      pawn19: "TetrahedronGeometry( 0.5 )",
-      pawn20: "TetrahedronGeometry( 0.5 )",
-      rook3: "BoxGeometry( 0.5, 0.5, 0.5 )",
-      rook4: "BoxGeometry( 0.5, 0.5, 0.5 )",
-      knight3: "IcosahedronGeometry( 0.45 )",
-      knight4: "IcosahedronGeometry( 0.45 )",
-      bishop3: "OctahedronGeometry( 0.5 )",
-      bishop4: "OctahedronGeometry( 0.5 )",
-      unicorn3: "ConeGeometry(0.3, 0.8, 15 )",
-      unicorn4: "ConeGeometry(0.3, 0.8, 15 )",
-      king2: "TorusGeometry(0.3, 0.15, 15, 15 )",
-      queen2: "TorusGeometry(0.3, 0.15, 15, 15 )"
-    }
-
-    pieces =
-      [
-        {{1, 1, 1}, :rook1},
-        {{2, 1, 1}, :knight1},
-        {{3, 1, 1}, :king1},
-        {{4, 1, 1}, :knight2},
-        {{5, 1, 1}, :rook2},
-        {{1, 2, 1}, :pawn1},
-        {{2, 2, 1}, :pawn2},
-        {{3, 2, 1}, :pawn3},
-        {{4, 2, 1}, :pawn4},
-        {{5, 2, 1}, :pawn5},
-        {{1, 1, 2}, :bishop1},
-        {{2, 1, 2}, :unicorn1},
-        {{3, 1, 2}, :queen1},
-        {{4, 1, 2}, :bishop2},
-        {{5, 1, 2}, :unicorn2},
-        {{1, 2, 2}, :pawn6},
-        {{2, 2, 2}, :pawn7},
-        {{3, 2, 2}, :pawn8},
-        {{4, 2, 2}, :pawn9},
-        {{5, 2, 2}, :pawn10},
-        {{1, 5, 5}, :rook3},
-        {{2, 5, 5}, :knight3},
-        {{3, 5, 5}, :king2},
-        {{4, 5, 5}, :knight4},
-        {{5, 5, 5}, :rook4},
-        {{1, 4, 5}, :pawn11},
-        {{2, 4, 5}, :pawn12},
-        {{3, 4, 5}, :pawn13},
-        {{4, 4, 5}, :pawn14},
-        {{5, 4, 5}, :pawn15},
-        {{1, 5, 4}, :unicorn3},
-        {{2, 5, 4}, :bishop3},
-        {{3, 5, 4}, :queen2},
-        {{4, 5, 4}, :unicorn4},
-        {{5, 5, 4}, :bishop4},
-        {{1, 4, 4}, :pawn16},
-        {{2, 4, 4}, :pawn17},
-        {{3, 4, 4}, :pawn18},
-        {{4, 4, 4}, :pawn19},
-        {{5, 4, 4}, :pawn20}
-      ]
-
-    board = Enum.reduce(pieces, board, fn {coords, name}, acc -> Map.put(acc, coords, name) end)
-
-    # game object
-    %{
-      board: board,
-      owner: owner,
-      moves: moves,
-      looks: looks,
-      behavior: behavior,
-      players: [:player1, :player2],
-      turn: 0,
-      round: 1,
-      status: :waiting_for_players
-    }
-  end
-
-  def elixir_data_to_JSON(data) do
-    Enum.map(data, fn {coords, name} ->
-      %{coords: Tuple.to_list(coords), name: Atom.to_string(name)}
+  #work in progress
+  def create_frontend_data_from_process_data(game_obj) do
+    pieces = Enum.reduce(game_obj.board, %{}, fn {position, value}, acc ->
+      if value === :empty do
+      acc
+      else
+        {x, y, z} = position
+        %{up: {up_x, up_y, up_z}, facing: {facing_x, facing_y, facing_z}} =
+          game_obj.piece_info[value].orientation
+        piece_obj = %{
+          name: value,
+          position: [x, y, z],
+          owner: game_obj.piece_info[value].owner,
+          color: game_obj.piece_info[value].color,
+          moves: Enum.map(game_obj.moves[value], fn {x, y, z} -> [x, y, z] end),
+          model: game_obj.piece_info[value].model,
+          orientation: %{up: [up_x, up_y, up_z], facing: [facing_x, facing_y, facing_z]}
+        }
+        Map.put(acc, value, piece_obj)
+      end
     end)
+
+    players = Enum.map(game_obj.players, fn {_num, obj} -> obj end)
+    promotion_zones = Enum.map(game_obj.promotion_zones, fn {_key, value} ->
+      Enum.map(value, fn {x, y, z} -> [x, y, z] end)
+    end)
+    game_obj
+    |> Map.put(:pieces, pieces)
+    |> Map.put(:players, players)
+    |> Map.put(:promotion_zones, promotion_zones)
+    |> Map.delete(:moves)
+    |> Map.delete(:piece_info)
+    |> Map.delete(:piece_behavior)
+    |> Map.delete(:board)
+
   end
-
-  @game_piece_info %{
-    rook1: %{owner: :player1, behavior: :rook, value: 14},
-    rook2: %{owner: :player2, behavior: :rook, value: 14}
-  }
-
-  # orientation is based off of top-of-head-direction + front-of-face-direction
-  # in raumschasch default player 1 orientation is pz_py, default player 2 is nz_ny
-  @orientations {
-    :pz_py,
-    :pz_px,
-    :pz_ny,
-    :pz_nx,
-    :pz_nx
-  }
-
-  @game_object %{
-    piece_behavior: @piece_behavior,
-    piece_info: %{
-      rook1: %{owner: :player1, behavior: :rook, value: 14, moves: {}, orientation: :pzpx}
-    },
-    board: :game_board,
-    players: [:player1, :player2],
-    status: %{
-      winner: nil,
-      still_playing: true,
-      turn: :player1,
-      round: 0
-    }
-  }
 
   def create_board(rows, columns, levels) do
     Map.new(
@@ -846,7 +79,7 @@ defmodule SpaceChess.GameEngine do
     create_board(rows, columns, levels)
   end
 
-  defp get_board_dimensions(board) do
+  def get_board_dimensions(board) do
     {board_dimensions, _space_status} = Enum.max(board)
     board_dimensions
   end
@@ -861,7 +94,7 @@ defmodule SpaceChess.GameEngine do
     {_name, piece_obj} = highest_possible_promotion_option(game_obj)
     name = game_obj.board[piece_position]
     owner = game_obj.piece_info[name][:owner]
-    promotion_zone = game_obj.promotion_zone[owner]
+    promotion_zone = game_obj.promotion_zones[owner]
     promoted_value = piece_obj.value
 
     nearest_promotion_zone_position =
@@ -888,11 +121,13 @@ defmodule SpaceChess.GameEngine do
     |> Enum.max_by(fn {_key, value} -> value.value end)
   end
 
-  def determine_value_of_piece(piece_behavior, board) do
-    movement = piece_behavior.movement
+  ## RUN THIS ON SETUP
+  def determine_value_of_piece(piece_name, game_obj) do
+    behavior = game_obj.piece_info[piece_name].behavior
+    movement = game_obj.piece_behavior[behavior].movement
 
     center_position =
-      board
+      game_obj.board
       |> get_board_dimensions()
       |> find_center_of_board_from_board_dimensions()
 
@@ -911,17 +146,19 @@ defmodule SpaceChess.GameEngine do
       |> Enum.reject(fn x -> Keyword.has_key?(x.opts, :capture_only) end)
       |> Enum.reject(fn x -> Keyword.has_key?(x.opts, :movement_only) end)
 
-    capture_moves = get_all_moves_of_a_piece(center_position, capture_movement, :default, board)
+    capture_game_obj = put_in(game_obj.piece_behavior[behavior].movement, capture_movement)
+    capture_moves = get_all_moves_of_a_piece(piece_name, center_position, capture_game_obj)
 
-    movement_only_moves =
-      get_all_moves_of_a_piece(center_position, movement_only_movement, :default, board)
+    movement_game_obj = put_in(game_obj.piece_behavior[behavior].movement, movement_only_movement)
+    movement_only_moves = get_all_moves_of_a_piece(piece_name, center_position, movement_game_obj)
 
-    normal_moves = get_all_moves_of_a_piece(center_position, normal_movement, :default, board)
+    normal_game_obj = put_in(game_obj.piece_behavior[behavior].movement, normal_movement)
+    normal_moves = get_all_moves_of_a_piece(piece_name, center_position, normal_game_obj)
 
     value = length(capture_moves) / 2 + length(movement_only_moves) / 2 + length(normal_moves)
 
     value =
-      if Keyword.has_key?(piece_behavior.opts, :is_king) do
+      if Keyword.has_key?(game_obj.piece_behavior[behavior].opts, :is_king) do
         value + 100_000
       else
         value
@@ -951,6 +188,7 @@ defmodule SpaceChess.GameEngine do
       if value === :empty do
         acc
       else
+        IO.inspect(game_obj.piece_info[value])
         if game_obj.piece_info[value][:owner] === game_obj.turn do
           acc + game_obj.piece_info[value][:value]
         else
@@ -979,7 +217,7 @@ defmodule SpaceChess.GameEngine do
   def distance_between_two_points(starting_coords, ending_coords) do
     {x, y, z} = ending_coords
     {a, b, c} = starting_coords
-    ((x - a) ** 2 + (y - b) ** 2 + (z - b) ** 2) ** 0.5
+    ((x - a) ** 2 + (y - b) ** 2 + (z - c) ** 2) ** 0.5
   end
 
   # zone is going to be a list of coords
@@ -993,24 +231,15 @@ defmodule SpaceChess.GameEngine do
     result.position
   end
 
-  def get_all_moves_of_all_pieces(gameObj) do
-    board = gameObj.board
+  def get_all_moves_of_all_pieces(game_obj) do
+    board = game_obj.board
 
-    Enum.reduce(board, %{}, fn {key, value}, acc ->
-      if value === :empty do
+    Enum.reduce(board, %{}, fn {piece_position, piece_name}, acc ->
+      if piece_name === :empty do
         acc
       else
-        behavior = gameObj.piece_info[value][:behavior]
-        movement = gameObj.piece_behavior[behavior][:movement]
-
-        movement =
-          rotate_transformations_based_on_orientation(
-            movement,
-            gameObj.piece_info[value][:orientation]
-          )
-
-        moves = get_all_moves_of_a_piece(key, movement, value, board)
-        Map.put(acc, value, moves)
+        moves = get_all_moves_of_a_piece(piece_name, piece_position, game_obj)
+        Map.put(acc, piece_name, moves)
       end
     end)
   end
@@ -1021,13 +250,22 @@ defmodule SpaceChess.GameEngine do
 
   # pieces on board will be :empty or have name which can be used to look up piece_status
 
-  # vector is made of transformation (direction) and count (how many times to repeat that )
+  def get_all_moves_of_a_piece(piece_name, piece_position, game_obj) do
+    behavior = game_obj.piece_info[piece_name][:behavior]
+    movement = game_obj.piece_behavior[behavior][:movement]
 
-  def get_all_moves_of_a_piece(piece_position, movement, piece_name, board) do
+    movement = rotate_transformations_based_on_orientation(
+        movement,
+        game_obj.piece_info[piece_name][:orientation]
+      )
+
+    game_obj = put_in(game_obj.piece_behavior[behavior].movement, movement)
+    movement = game_obj.piece_behavior[behavior][:movement]
+
     moves =
       Enum.reduce(movement, [], fn branch, acc ->
         new_moves =
-          move_along_branch_and_record_moves(true, branch, piece_position, piece_name, board, [])
+          move_along_branch_and_record_moves(:ok, piece_name, piece_position, game_obj, branch, [])
 
         [new_moves | acc]
       end)
@@ -1037,96 +275,37 @@ defmodule SpaceChess.GameEngine do
     |> Enum.uniq()
   end
 
-  # def test_get_all_moves_of_a_piece() do
-  #   board = create_board(5, 5, 5)
-  #   movement = @piece_behavior.rook.movement
-  #   piece_name = :rook1
-  #   position = {3, 3, 3}
-  #   get_all_moves_of_a_piece(position, movement, piece_name, board)
-  # end
-
-  def test_get_all_moves_of_a_piece() do
-    board = create_board(5, 5, 5)
-    movement = @piece_behavior.knight.movement
-    piece_name = :knight1
-    position = {3, 3, 3}
-    get_all_moves_of_a_piece(position, movement, piece_name, board)
-  end
-
   # a path is the connection of multiple branches -> path: branch -- branch --- branch
-  def move_along_branch_and_record_moves(
-        true,
-        movement_map,
-        piece_position,
-        piece_name,
-        board,
-        moves \\ []
-      )
-      when movement_map.steps > 0 do
-    movement_map = Map.put(movement_map, :steps, decrement_steps(movement_map.steps))
-    piece_position = apply_transformation(piece_position, movement_map.transformation)
+  def move_along_branch_and_record_moves(:ok, piece_name, piece_position, game_obj, branch, moves) when branch.steps > 0 do
+    branch = Map.put(branch, :steps, decrement_steps(branch.steps))
+    piece_position = apply_transformation(piece_position, branch.transformation)
 
     {continue_path, record_move, _no_capture} =
       {true, true, true}
-      |> check_in_bounds(board, piece_position)
-      |> check_status_of_space(board, movement_map, piece_position, piece_name)
-      |> check_recording_opts(movement_map)
-      |> check_if_final_move_in_path(movement_map)
+      |> check_in_bounds(piece_position, game_obj)
+      |> check_status_of_space(piece_name, piece_position, game_obj, branch)
+      |> check_recording_opts(branch)
+      |> check_if_final_move_in_path(branch)
 
     moves = maybe_record_move(record_move, piece_position, moves)
 
-    move_along_branch_and_record_moves(
-      continue_path,
-      movement_map,
-      piece_position,
-      piece_name,
-      board,
-      moves
-    )
+    continue_path = if continue_path do :ok else :stop end
+    move_along_branch_and_record_moves(continue_path, piece_name, piece_position, game_obj, branch, moves)
   end
 
-  def move_along_branch_and_record_moves(
-        true,
-        movement_map,
-        piece_position,
-        piece_name,
-        board,
-        moves
-      ) do
-    if length(movement_map.branches) > 0 do
-      Enum.reduce(movement_map.branches, moves, fn branch, acc ->
+  def move_along_branch_and_record_moves(:ok, piece_name, piece_position, game_obj, branch, moves) do
+      if length(branch.branches) > 0 do
+      Enum.reduce(branch.branches, moves, fn child_branch, acc ->
         new_moves =
-          move_along_branch_and_record_moves(
-            true,
-            branch,
-            piece_position,
-            piece_name,
-            board,
-            moves
-          )
-
+          move_along_branch_and_record_moves(:ok, piece_name, piece_position, game_obj, child_branch, moves)
         [new_moves | acc]
       end)
     else
-      move_along_branch_and_record_moves(
-        false,
-        movement_map,
-        piece_position,
-        piece_name,
-        board,
-        moves
-      )
+      move_along_branch_and_record_moves(:stop, piece_name, piece_position, game_obj, branch, moves)
     end
   end
 
-  def move_along_branch_and_record_moves(
-        false,
-        _movement_map,
-        _piece_position,
-        _piece_name,
-        _board,
-        moves
-      ) do
+  def move_along_branch_and_record_moves(:stop, _piece_name, _piece_position, _game_obj, _branch, moves) do
     moves
   end
 
@@ -1146,8 +325,8 @@ defmodule SpaceChess.GameEngine do
     end
   end
 
-  defp check_in_bounds({continue_path, record_move, no_capture}, board, position) do
-    if !Map.has_key?(board, position) do
+  defp check_in_bounds({continue_path, record_move, no_capture}, piece_position, game_obj) do
+    if !Map.has_key?(game_obj.board, piece_position) do
       {false, false, no_capture}
     else
       {continue_path, record_move, no_capture}
@@ -1156,20 +335,19 @@ defmodule SpaceChess.GameEngine do
 
   def check_status_of_space(
         {continue_path, record_move, no_capture},
-        board,
-        movement_map,
+        piece_name,
         piece_position,
-        piece_name
+        game_obj,
+        branch
       ) do
-    space = Map.get(board, piece_position)
-
-    if space === :empty do
+    space = game_obj.board[piece_position]
+    if space === :empty or space === nil do
       {continue_path, record_move, no_capture}
     else
       {continue_path, record_move, no_capture}
-      |> check_movement_only(movement_map)
-      |> check_jump(movement_map)
-      |> check_if_friendly(piece_name, space, @game_piece_info)
+      |> check_movement_only(branch)
+      |> check_jump(branch)
+      |> check_if_friendly(piece_name, space, game_obj)
     end
   end
 
@@ -1193,9 +371,9 @@ defmodule SpaceChess.GameEngine do
          {continue_path, record_move, no_capture},
          piece_name,
          space,
-         game_piece_info
+         game_obj
        ) do
-    if game_piece_info[space][:owner] === game_piece_info[piece_name][:owner] do
+    if game_obj.piece_info[space].owner === game_obj.piece_info[piece_name].owner do
       {continue_path, false, no_capture}
     else
       {continue_path, record_move, false}
@@ -1245,10 +423,9 @@ defmodule SpaceChess.GameEngine do
     end
   end
 
+  ### MOVEMENT END
+
   # returns a list of tuples (transformations), with home many times to apply them
-  def get_all_vectors_of_a_piece(matrix) do
-    Enum.map(matrix, fn {a, b} -> {Map.get(@matrix_to_transformations, a), b} end)
-  end
 
   def apply_transformation(piece_position, transformation) do
     {a, b, c} = piece_position
