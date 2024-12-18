@@ -535,10 +535,26 @@ defmodule SpaceChess.GameEngine do
       %{up: {0, 0, 1}, facing: {1, 0, 0}} -> {:py, :nx, :pz}
       %{up: {0, 0, 1}, facing: {0, -1, 0}} -> {:nx, :ny, :pz}
       %{up: {0, 0, 1}, facing: {-1, 0, 0}} -> {:ny, :px, :pz}
-      %{up: {0, 0, -1}, facing: {0, 1, 0}} -> {:px, :py, :nz}
-      %{up: {0, 0, -1}, facing: {1, 0, 0}} -> {:py, :nx, :nz}
-      %{up: {0, 0, -1}, facing: {0, -1, 0}} -> {:nx, :ny, :nz}
-      %{up: {0, 0, -1}, facing: {-1, 0, 0}} -> {:ny, :px, :nz}
+      %{up: {0, 0, -1}, facing: {0, 1, 0}} -> {:nx, :py, :nz}
+      %{up: {0, 0, -1}, facing: {1, 0, 0}} -> {:py, :px, :nz}
+      %{up: {0, 0, -1}, facing: {0, -1, 0}} -> {:px, :ny, :nz}
+      %{up: {0, 0, -1}, facing: {-1, 0, 0}} -> {:ny, :nx, :nz}
+      %{up: {0, 1, 0}, facing: {0, 0, -1}} -> {:px, :pz, :ny}
+      %{up: {0, 1, 0}, facing: {1, 0, 0}} -> {:py, :pz, :px}
+      %{up: {0, 1, 0}, facing: {0, 0, 1}} -> {:nx, :pz, :py}
+      %{up: {0, 1, 0}, facing: {-1, 0, 0}} -> {:ny, :pz, :nx}
+      %{up: {0, -1, 0}, facing: {0, 0, -1}} -> {:nx, :nz, :ny}
+      %{up: {0, -1, 0}, facing: {1, 0, 0}} -> {:py, :nz, :nx}
+      %{up: {0, -1, 0}, facing: {0, 0, 1}} -> {:px, :nz, :py}
+      %{up: {0, -1, 0}, facing: {-1, 0, 0}} -> {:ny, :nz, :px}
+      %{up: {1, 0, 0}, facing: {0, 1, 0}} -> {:pz, :py, :nx}
+      %{up: {1, 0, 0}, facing: {0, 0, 1}} -> {:pz, :px, :py}
+      %{up: {1, 0, 0}, facing: {0, -1, 0}} -> {:pz, :ny, :px}
+      %{up: {1, 0, 0}, facing: {0, 0, -1}} -> {:pz, :nx, :ny}
+      %{up: {-1, 0, 0}, facing: {0, 1, 0}} -> {:nz, :py, :px}
+      %{up: {-1, 0, 0}, facing: {0, 0, 1}} -> {:nz, :nx, :py}
+      %{up: {-1, 0, 0}, facing: {0, -1, 0}} -> {:nz, :ny, :nx}
+      %{up: {-1, 0, 0}, facing: {0, 0, -1}} -> {:nz, :px, :ny}
     end
   end
 end

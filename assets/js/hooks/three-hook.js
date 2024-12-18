@@ -315,6 +315,156 @@ function addHighlightedMoves(listOfMoves){
       }
       addPieceInfo(new_info)
     }
+    addTestOrientationPiece()
+  }
+
+  function addTestOrientationPiece(){
+    const orientationPiece = new THREE.Group()
+    orientationPiece.name = 'orientationPiece'
+
+    const geometry = new THREE.ConeGeometry(0.1, 0.8, 15)
+    const material1 = new THREE.MeshStandardMaterial( { color: 'red', roughness: 0.477, metalness: 1} )
+    const obj1 = new THREE.Mesh(geometry, material1)
+
+    obj1.rotation.x = Math.PI/2
+    // orientationPiece.add(obj1)
+    const material2 = new THREE.MeshStandardMaterial( { color: 'blue', roughness: 0.477, metalness: 1} )
+    const obj2 = new THREE.Mesh(geometry, material2)
+    // orientationPiece.add(obj2)
+    const material3 = new THREE.MeshStandardMaterial( { color: 'green', roughness: 0.477, metalness: 1} )
+    const obj3 = new THREE.Mesh(geometry, material3)
+    obj3.rotation.z = -1 * Math.PI/2
+    // orientationPiece.add(obj3)
+    orientationPiece.add(obj1)
+    orientationPiece.add(obj2)
+    orientationPiece.add(obj3)
+    orientationPiece.position.set(4, 4, 4)
+    scene.add(orientationPiece)
+    orientPiece(orientationPiece, {up: [-1, 0, 0], facing: [0, 0, -1]})
+  }
+
+  //orientation_obj is {up: [0, 0, 1], facing: [0, 1, 0]} 
+  function orientationEqual(orientationObj1, orientationObj2){
+    if (arraysEqual(orientationObj1.up, orientationObj2.up) && 
+    arraysEqual(orientationObj1.facing, orientationObj2.facing)){
+      return true
+    } 
+    return false
+  }
+  //for setup purposes
+  function orientPiece(piece, orientationObj){
+    if (orientationEqual(orientationObj,{up: [0, 0, 1], facing: [0, 1, 0]})){
+      return
+    }
+    if (orientationEqual(orientationObj, {up: [0, 0, 1], facing: [1, 0, 0]})){
+      piece.rotation.z = -1 * Math.PI/2
+      return
+    }
+    if (orientationEqual(orientationObj,  {up: [0, 0, 1], facing: [0, -1, 0]})){
+      piece.rotation.z = -1 * Math.PI
+      return
+    }
+    if (orientationEqual(orientationObj, {up: [0, 0, 1], facing: [-1, 0, 0]})){
+      piece.rotation.z = 1 * Math.PI/2
+      return
+    }
+    if (orientationEqual(orientationObj, {up: [0, 0, -1], facing: [0, 1, 0]})){
+      piece.rotation.x = Math.PI
+      piece.rotation.z = Math.PI
+      return
+    }
+    if (orientationEqual(orientationObj, {up: [0, 0, -1], facing: [1, 0, 0]})){
+      piece.rotation.x = Math.PI
+      piece.rotation.z = -1 * Math.PI/2
+      return
+    }
+    if (orientationEqual(orientationObj, {up: [0, 0, -1], facing: [0, -1, 0]})){
+      piece.rotation.x = Math.PI
+      return
+    }
+    if (orientationEqual(orientationObj, {up: [0, 0, -1], facing: [-1, 0, 0]})){
+      piece.rotation.x = Math.PI
+      piece.rotation.z = 1 * Math.PI/2
+      return
+    }
+    if (orientationEqual(orientationObj, {up: [0, 1, 0], facing: [0, 0, -1]})){
+      piece.rotation.x = -1 * Math.PI/2
+      return
+    }
+    if (orientationEqual(orientationObj, {up: [0, 1, 0], facing: [1, 0, 0]})){
+      piece.rotation.x = -1 * Math.PI/2
+      piece.rotation.z = -1 * Math.PI/2
+      return
+    }
+    if (orientationEqual(orientationObj, {up: [0, 1, 0], facing: [0, 0, 1]})){
+      piece.rotation.x = -1 * Math.PI/2
+      piece.rotation.z = 1 * Math.PI
+      return
+    }
+    if (orientationEqual(orientationObj, {up: [0, 1, 0], facing: [-1, 0, 0]})){
+      piece.rotation.x = -1 * Math.PI/2
+      piece.rotation.z = 1 * Math.PI/2
+      return
+    }
+    if (orientationEqual(orientationObj, {up: [0, -1, 0], facing: [0, 0, -1]})){
+      piece.rotation.x = 1 * Math.PI/2
+      piece.rotation.z = 1 * Math.PI
+      return
+    }
+    if (orientationEqual(orientationObj, {up: [0, -1, 0], facing: [1, 0, 0]})){
+      piece.rotation.x = 1 * Math.PI/2
+      piece.rotation.z = -1 * Math.PI/2
+      return
+    }
+    if (orientationEqual(orientationObj, {up: [0, -1, 0], facing: [0, 0, 1]})){
+      piece.rotation.x = 1 * Math.PI/2
+      return
+    }
+    if (orientationEqual(orientationObj, {up: [0, -1, 0], facing: [-1, 0, 0]})){
+      piece.rotation.x = 1 * Math.PI/2
+      piece.rotation.z = 1 * Math.PI/2
+      return
+    }
+    if (orientationEqual(orientationObj, {up: [1, 0, 0], facing: [0, 1, 0]})){
+      piece.rotation.y = 1 * Math.PI/2
+      return
+    }
+    if (orientationEqual(orientationObj, {up: [1, 0, 0], facing: [0, 0, 1]})){
+      piece.rotation.y = 1 * Math.PI/2
+      piece.rotation.z = 1 * Math.PI/2
+      return
+    }
+    if (orientationEqual(orientationObj, {up: [1, 0, 0], facing: [0, -1, 0]})){
+      piece.rotation.y = 1 * Math.PI/2
+      piece.rotation.z = 1 * Math.PI
+      return
+    }
+    if (orientationEqual(orientationObj, {up: [1, 0, 0], facing: [0, 0, -1]})){
+      piece.rotation.y = 1 * Math.PI/2
+      piece.rotation.z = -1 * Math.PI/2
+      return
+    }
+    if (orientationEqual(orientationObj, {up: [-1, 0, 0], facing: [0, 1, 0]})){
+      piece.rotation.y = -1 * Math.PI/2
+      return
+    }
+    if (orientationEqual(orientationObj, {up: [-1, 0, 0], facing: [0, 0, 1]})){
+      piece.rotation.y = -1 * Math.PI/2
+      piece.rotation.z = -1 * Math.PI/2
+      return
+    }
+    if (orientationEqual(orientationObj, {up: [-1, 0, 0], facing: [0, -1, 0]})){
+      piece.rotation.y = -1 * Math.PI/2
+      piece.rotation.z = -1 * Math.PI
+      return
+    }
+    if (orientationEqual(orientationObj, {up: [-1, 0, 0], facing: [0, 0, -1]})){
+      piece.rotation.y = -1 * Math.PI/2
+      piece.rotation.z = 1 * Math.PI/2
+      return
+    }
+
+  
   }
 
   function addPieceInfo(new_info){
