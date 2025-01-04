@@ -179,8 +179,86 @@ defmodule SpaceChess.GameEngine do
   end
 
   def get_position_by_name(name, board) do
+
     {key, _val} = Enum.find(board, fn {_key, val} -> val === name end)
     key
+  end
+
+
+  def remove_moves_that_put_king_pieces_in_danger(player, game_obj) do
+    king_pieces = get_king_pieces_of_player(player, game_obj)
+    new_moves = get_all_moves_of_a_player(player, game_obj)
+    game_obj = Map.put(game_obj, :moves, new_moves)
+    moves = destructure_moves(game_obj.moves)
+    Enum.reject(moves, fn {val, move} ->
+    game_obj = Map.put(game_obj, :board, make_move(val, move, game_obj.board) )
+    puts_pieces_in_danger?(king_pieces, game_obj) === true
+    end)
+    # Enum.map(player_moves)
+  end
+
+  #works with checkmate
+  def is_game_over_for_player?(player, game_obj) do
+    moves = get_all_moves_of_a_player(player, game_obj)
+    king_pieces = get_king_pieces_of_player(player, game_obj)
+    if length(moves) === 0 or length(king_pieces) === 0 do
+      true
+    else
+      false
+    end
+  end
+
+
+
+  def get_king_pieces_of_player(player, game_obj) do
+    Enum.reduce(game_obj.board, [], fn {_key, value}, acc ->
+      if value === :empty do
+        acc
+      else
+        behavior = game_obj.piece_info[value].behavior
+        if game_obj.piece_info[value].owner === player and Keyword.has_key?(game_obj.piece_behavior[behavior].opts, :is_king) do
+          [value | acc]
+        else
+          acc
+        end
+      end
+    end)
+  end
+
+  def destructure_moves(moves) do
+    flattened_moves = Enum.reduce(moves, [], fn {name, moves}, acc ->
+      flat_moves = Enum.reduce(moves, [], fn move, acc ->
+        [{name, move} | acc]
+    end)
+    [flat_moves | acc]
+    end)
+    List.flatten(flattened_moves)
+  end
+
+  def structure_moves(moves) do
+    Enum.reduce(moves, %{}, fn {key, val}, acc ->
+      if Map.has_key?(acc, key) do
+        Map.put(acc, key, acc[key] ++ [val])
+      else
+         Map.put(acc, key, [val])
+      end
+    end)
+  end
+
+  def get_all_moves_of_a_player(player, game_obj) do
+    Enum.reject(game_obj.moves, fn {key, _val} ->
+      game_obj.piece_info[key].owner != player
+  end)
+  end
+
+  def puts_pieces_in_danger?(pieces, game_obj) do
+    Enum.reduce_while(pieces, false, fn x, acc ->
+     if piece_in_danger?(x, game_obj) === true do
+      {:halt, true}
+     else
+      {:cont, acc}
+     end
+    end)
   end
 
   def piece_in_danger?(name, game_obj) do
@@ -242,6 +320,78 @@ defmodule SpaceChess.GameEngine do
     end)
   end
 
+  def async_maxi_max(game_obj, player, depth) do
+      moves = get_all_moves_of_all_pieces(game_obj)
+    moves = moves
+    |> Enum.reject(fn {key, _value} -> game_obj.piece_info[key].owner !== player end)
+    |> Enum.into(%{})
+
+    moves_and_values = Task.async(fn ->
+      Enum.reduce(moves, [], fn {piece_name, moves}, acc ->
+
+        evaluated_moves = Enum.reduce(moves, [], fn move, acc ->
+
+          board = make_move(piece_name, move, game_obj.board)
+          game_obj = game_obj
+          |> Map.put( :board, board)
+          |> next_turn()
+          args = {game_obj, player, {piece_name, move}, depth - 1}
+          new_moves_and_values =  async_future_path_crawler(args)
+          [new_moves_and_values | acc]
+        end)
+        [evaluated_moves | acc]
+      end)
+    end)
+
+    moves_and_values = Task.await(moves_and_values, 15000)
+
+    moves_and_values
+    |> List.flatten()
+    |> Enum.max_by(fn {_move , value} -> value end)
+    |> case do
+      {move, _value} -> move
+    end
+  end
+
+  def async_future_path_crawler(args) do
+    {game_obj, og_player, og_move, depth} = args
+
+    if depth > 0 do
+      moves = get_all_moves_of_all_pieces(game_obj)
+      moves = moves
+      |> Enum.reject(fn {key, _value} -> game_obj.piece_info[key].owner !== game_obj.turn end)
+      |> Enum.into(%{})
+
+      moves_and_values =
+        Task.async(fn ->
+          Enum.reduce(moves, [], fn {piece_name, moves}, acc ->
+            evaluated_moves = Enum.reduce(moves, [], fn move, acc ->
+
+              board = make_move(piece_name, move, game_obj.board)
+              game_obj = game_obj
+              |> Map.put( :board, board)
+              |> next_turn()
+
+              args = {game_obj, og_player, og_move , depth - 1}
+              new_moves_and_values =  async_future_path_crawler(args)
+                [new_moves_and_values | acc]
+            end)
+            [evaluated_moves | acc]
+            end)
+        end)
+
+       moves_and_values = Task.await(moves_and_values, 15000)
+
+      moves_and_values
+      |> List.flatten()
+      |> Enum.max_by(fn {_move , value} -> value end)
+
+    else
+      {game_obj, og_player, og_move, _depth} = args
+      value = evaluate_board(game_obj, og_player)
+      {og_move, value}
+    end
+  end
   #maxi_max will determine highest possible move the computer can make
   def maxi_max(game_obj, player, depth) do
     moves = get_all_moves_of_all_pieces(game_obj)
@@ -249,7 +399,9 @@ defmodule SpaceChess.GameEngine do
     |> Enum.reject(fn {key, _value} -> game_obj.piece_info[key].owner !== player end)
     |> Enum.into(%{})
 
-    moves_and_values = Enum.reduce(moves, [], fn {piece_name, moves}, acc ->
+    moves_and_values =
+
+      Enum.reduce(moves, [], fn {piece_name, moves}, acc ->
 
       evaluated_moves = Enum.reduce(moves, [], fn move, acc ->
 
@@ -274,6 +426,7 @@ defmodule SpaceChess.GameEngine do
     end
 
   end
+
 
 
   def future_path_crawler(args) do
